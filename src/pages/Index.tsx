@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import Header from "@/components/Header";
+import BottomNav from "@/components/BottomNav";
 import ResultCard from "@/components/ResultCard";
 import AddResultDialog from "@/components/AddResultDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
@@ -69,7 +70,7 @@ const Index = () => {
   const isLoading = matchesLoading || teamsLoading;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background pb-20">
       <Header />
 
       <main className="container max-w-lg mx-auto px-4 py-6">
@@ -135,6 +136,8 @@ const Index = () => {
           )}
         </div>
       </main>
+
+      <BottomNav />
 
       {/* Dialogs */}
       {teams && (
