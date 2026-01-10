@@ -146,4 +146,12 @@
   .icon-button-delete {
     @apply icon-button text-destructive hover:bg-destructive/10;
   }
+
+  .bg-team-home {
+    background-color: hsl(var(--team-home));
+  }
+
+  .bg-team-away {
+    background-color: hsl(var(--team-away));
+  }
 }
