@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -14,6 +14,7 @@ import {
   useDeletePlayer,
   type Player,
 } from "@/hooks/usePlayers";
+import { useTeams } from "@/hooks/useMatches";
 
 const Players = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -21,7 +22,8 @@ const Players = () => {
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
 
-  const { data: players, isLoading } = usePlayers();
+  const { data: players, isLoading: playersLoading } = usePlayers();
+  const { data: teams, isLoading: teamsLoading } = useTeams();
   const createPlayer = useCreatePlayer();
   const updatePlayer = useUpdatePlayer();
   const deletePlayer = useDeletePlayer();
@@ -51,13 +53,15 @@ const Players = () => {
     }
   };
 
-  const handleSave = (name: string) => {
+  const handleSave = (name: string, defaultTeamId: string | null) => {
     if (editPlayer) {
-      updatePlayer.mutate({ id: editPlayer.id, name });
+      updatePlayer.mutate({ id: editPlayer.id, name, defaultTeamId });
     } else {
-      createPlayer.mutate(name);
+      createPlayer.mutate({ name, defaultTeamId });
     }
   };
+
+  const isLoading = playersLoading || teamsLoading;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -99,6 +103,7 @@ const Players = () => {
                 key={player.id}
                 id={player.id}
                 name={player.name}
+                defaultTeamName={player.default_team?.name}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
               />
@@ -118,12 +123,15 @@ const Players = () => {
       <BottomNav />
 
       {/* Dialogs */}
-      <PlayerDialog
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onSave={handleSave}
-        editPlayer={editPlayer}
-      />
+      {teams && (
+        <PlayerDialog
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onSave={handleSave}
+          editPlayer={editPlayer}
+          teams={teams}
+        />
+      )}
 
       <DeleteConfirmDialog
         open={deleteDialogOpen}

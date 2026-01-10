@@ -1,13 +1,15 @@
 import { Pencil, Trash2, User } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface PlayerCardProps {
   id: string;
   name: string;
+  defaultTeamName?: string | null;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
 }
 
-const PlayerCard = ({ id, name, onEdit, onDelete }: PlayerCardProps) => {
+const PlayerCard = ({ id, name, defaultTeamName, onEdit, onDelete }: PlayerCardProps) => {
   return (
     <div className="result-card animate-fade-in">
       <div className="flex items-center justify-between">
@@ -15,7 +17,14 @@ const PlayerCard = ({ id, name, onEdit, onDelete }: PlayerCardProps) => {
           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
             <User className="w-5 h-5 text-primary" />
           </div>
-          <span className="font-medium text-foreground">{name}</span>
+          <div className="flex flex-col">
+            <span className="font-medium text-foreground">{name}</span>
+            {defaultTeamName && (
+              <Badge variant="secondary" className="text-xs w-fit mt-1">
+                {defaultTeamName}
+              </Badge>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-1">

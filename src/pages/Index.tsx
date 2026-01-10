@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus } from "lucide-react";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -15,6 +15,8 @@ import {
   useDeleteMatch,
   type Match,
 } from "@/hooks/useMatches";
+import { usePlayers } from "@/hooks/usePlayers";
+import { useMatchGoals, useSaveMatchGoals } from "@/hooks/useGoals";
 
 const Index = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -24,9 +26,12 @@ const Index = () => {
 
   const { data: matches, isLoading: matchesLoading } = useMatches();
   const { data: teams, isLoading: teamsLoading } = useTeams();
+  const { data: players, isLoading: playersLoading } = usePlayers();
+  const { data: existingGoals } = useMatchGoals(editMatch?.id || null);
   const createMatch = useCreateMatch();
   const updateMatch = useUpdateMatch();
   const deleteMatch = useDeleteMatch();
+  const saveGoals = useSaveMatchGoals();
 
   const handleAddResult = () => {
     setEditMatch(null);
@@ -53,21 +58,69 @@ const Index = () => {
     }
   };
 
-  const handleSave = (data: {
+  const handleSave = async (data: {
     homeTeamId: string;
     awayTeamId: string;
     homeScore: number;
     awayScore: number;
     matchDate: string;
+    homeGoals: string[];
+    awayGoals: string[];
   }) => {
+    const matchData = {
+      homeTeamId: data.homeTeamId,
+      awayTeamId: data.awayTeamId,
+      homeScore: data.homeScore,
+      awayScore: data.awayScore,
+      matchDate: data.matchDate,
+    };
+
     if (editMatch) {
-      updateMatch.mutate({ id: editMatch.id, data });
+      await updateMatch.mutateAsync({ id: editMatch.id, data: matchData });
+      // Save goals for edit
+      const goals = [
+        ...data.homeGoals.map((playerId) => ({
+          playerId,
+          teamId: data.homeTeamId,
+        })),
+        ...data.awayGoals.map((playerId) => ({
+          playerId,
+          teamId: data.awayTeamId,
+        })),
+      ];
+      await saveGoals.mutateAsync({ matchId: editMatch.id, goals });
     } else {
-      createMatch.mutate(data);
+      // For new matches, we need to create the match first, then save goals
+      // Using a workaround: we'll create match with returned id
+      const { data: newMatch, error } = await import("@/integrations/supabase/client")
+        .then(m => m.supabase)
+        .then(supabase => 
+          supabase.from("matches").insert({
+            home_team_id: data.homeTeamId,
+            away_team_id: data.awayTeamId,
+            home_score: data.homeScore,
+            away_score: data.awayScore,
+            match_date: data.matchDate,
+          }).select().single()
+        );
+      
+      if (!error && newMatch) {
+        const goals = [
+          ...data.homeGoals.map((playerId) => ({
+            playerId,
+            teamId: data.homeTeamId,
+          })),
+          ...data.awayGoals.map((playerId) => ({
+            playerId,
+            teamId: data.awayTeamId,
+          })),
+        ];
+        await saveGoals.mutateAsync({ matchId: newMatch.id, goals });
+      }
     }
   };
 
-  const isLoading = matchesLoading || teamsLoading;
+  const isLoading = matchesLoading || teamsLoading || playersLoading;
 
   return (
     <div className="min-h-screen bg-background pb-20">
@@ -140,13 +193,15 @@ const Index = () => {
       <BottomNav />
 
       {/* Dialogs */}
-      {teams && (
+      {teams && players && (
         <AddResultDialog
           open={dialogOpen}
           onOpenChange={setDialogOpen}
           teams={teams}
+          players={players}
           onSave={handleSave}
           editMatch={editMatch}
+          existingGoals={existingGoals}
         />
       )}
 

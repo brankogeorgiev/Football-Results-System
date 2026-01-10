@@ -154,20 +154,31 @@ export type Database = {
       players: {
         Row: {
           created_at: string
+          default_team_id: string | null
           id: string
           name: string
         }
         Insert: {
           created_at?: string
+          default_team_id?: string | null
           id?: string
           name: string
         }
         Update: {
           created_at?: string
+          default_team_id?: string | null
           id?: string
           name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "players_default_team_id_fkey"
+            columns: ["default_team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       teams: {
         Row: {
