@@ -8,12 +8,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+interface Team {
+  id: string;
+  name: string;
+}
 
 interface PlayerDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onSave: (name: string) => void;
-  editPlayer?: { id: string; name: string } | null;
+  onSave: (name: string, defaultTeamId: string | null) => void;
+  editPlayer?: { id: string; name: string; default_team_id: string | null } | null;
+  teams: Team[];
 }
 
 const PlayerDialog = ({
@@ -21,20 +34,24 @@ const PlayerDialog = ({
   onOpenChange,
   onSave,
   editPlayer,
+  teams,
 }: PlayerDialogProps) => {
   const [name, setName] = useState("");
+  const [defaultTeamId, setDefaultTeamId] = useState<string>("none");
 
   useEffect(() => {
     if (editPlayer) {
       setName(editPlayer.name);
+      setDefaultTeamId(editPlayer.default_team_id || "none");
     } else {
       setName("");
+      setDefaultTeamId("none");
     }
   }, [editPlayer, open]);
 
   const handleSave = () => {
     if (!name.trim()) return;
-    onSave(name.trim());
+    onSave(name.trim(), defaultTeamId === "none" ? null : defaultTeamId);
     onOpenChange(false);
   };
 
@@ -64,6 +81,23 @@ const PlayerDialog = ({
               placeholder="Enter player name"
               autoFocus
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label>Default Team (optional)</Label>
+            <Select value={defaultTeamId} onValueChange={setDefaultTeamId}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select team" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No default team</SelectItem>
+                {teams.map((team) => (
+                  <SelectItem key={team.id} value={team.id}>
+                    {team.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <Button

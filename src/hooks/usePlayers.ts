@@ -5,7 +5,9 @@ import { toast } from "sonner";
 export interface Player {
   id: string;
   name: string;
+  default_team_id: string | null;
   created_at: string;
+  default_team?: { id: string; name: string } | null;
 }
 
 export const usePlayers = () => {
@@ -14,7 +16,10 @@ export const usePlayers = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("players")
-        .select("*")
+        .select(`
+          *,
+          default_team:teams(id, name)
+        `)
         .order("name");
       if (error) throw error;
       return data as Player[];
@@ -26,8 +31,11 @@ export const useCreatePlayer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (name: string) => {
-      const { error } = await supabase.from("players").insert({ name });
+    mutationFn: async ({ name, defaultTeamId }: { name: string; defaultTeamId: string | null }) => {
+      const { error } = await supabase.from("players").insert({ 
+        name,
+        default_team_id: defaultTeamId 
+      });
       if (error) throw error;
     },
     onSuccess: () => {
@@ -44,10 +52,10 @@ export const useUpdatePlayer = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async ({ id, name }: { id: string; name: string }) => {
+    mutationFn: async ({ id, name, defaultTeamId }: { id: string; name: string; defaultTeamId: string | null }) => {
       const { error } = await supabase
         .from("players")
-        .update({ name })
+        .update({ name, default_team_id: defaultTeamId })
         .eq("id", id);
       if (error) throw error;
     },
