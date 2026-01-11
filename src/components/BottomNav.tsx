@@ -1,10 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
-import { Trophy, Users } from "lucide-react";
+import { Trophy, Users, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { path: "/", label: "Results", icon: Trophy },
   { path: "/players", label: "Players", icon: Users },
+  { path: "/statistics", label: "Stats", icon: BarChart3 },
 ];
 
 const BottomNav = () => {
