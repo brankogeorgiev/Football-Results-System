@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Plus, Minus, ArrowLeft, ArrowRight, X, User } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Plus, Minus, X, User } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +29,12 @@ interface Player {
   id: string;
   name: string;
   default_team_id: string | null;
+  isTemporary?: boolean;
+}
+
+interface PitchPlayer {
+  id: string;
+  positionIndex: number;
 }
 
 interface Goal {
@@ -68,7 +74,7 @@ const AddResultDialog = ({
   open,
   onOpenChange,
   teams,
-  players,
+  players: initialPlayers,
   onSave,
   editMatch,
   existingGoals = [],
@@ -82,10 +88,20 @@ const AddResultDialog = ({
   );
   const [homeGoals, setHomeGoals] = useState<string[]>([]);
   const [awayGoals, setAwayGoals] = useState<string[]>([]);
-  const [homePlayers, setHomePlayers] = useState<string[]>([]);
-  const [awayPlayers, setAwayPlayers] = useState<string[]>([]);
+  const [homePitchPlayers, setHomePitchPlayers] = useState<PitchPlayer[]>([]);
+  const [awayPitchPlayers, setAwayPitchPlayers] = useState<PitchPlayer[]>([]);
   const [playerModalOpen, setPlayerModalOpen] = useState(false);
   const [selectingForTeam, setSelectingForTeam] = useState<"home" | "away">("home");
+  const [selectingPosition, setSelectingPosition] = useState<number>(0);
+  const [selectingForGoal, setSelectingForGoal] = useState(false);
+  
+  // Local players list including temporary ones
+  const [allPlayers, setAllPlayers] = useState<Player[]>(initialPlayers);
+
+  // Reset players when initial players change
+  useEffect(() => {
+    setAllPlayers(initialPlayers);
+  }, [initialPlayers]);
 
   useEffect(() => {
     if (editMatch) {
@@ -104,8 +120,8 @@ const AddResultDialog = ({
 
       setHomeGoals(homeGoalsList);
       setAwayGoals(awayGoalsList);
-      setHomePlayers(homeGoalsList);
-      setAwayPlayers(awayGoalsList);
+      setHomePitchPlayers([]);
+      setAwayPitchPlayers([]);
     } else {
       setHomeTeamId(teams[0]?.id || "");
       setAwayTeamId(teams[1]?.id || "");
@@ -114,62 +130,119 @@ const AddResultDialog = ({
       setMatchDate(new Date().toISOString().split("T")[0]);
       setHomeGoals([]);
       setAwayGoals([]);
-      setHomePlayers([]);
-      setAwayPlayers([]);
+      setHomePitchPlayers([]);
+      setAwayPitchPlayers([]);
     }
   }, [editMatch, teams, open, existingGoals]);
 
-  useEffect(() => {
-    setHomeScore(homeGoals.length);
-  }, [homeGoals]);
-
-  useEffect(() => {
-    setAwayScore(awayGoals.length);
-  }, [awayGoals]);
-
   const handleSave = () => {
     if (!homeTeamId || !awayTeamId) return;
+    
+    // Filter out temporary players from goals (they can't be saved to DB)
+    const validHomeGoals = homeGoals.filter(id => {
+      const player = allPlayers.find(p => p.id === id);
+      return player && !player.isTemporary;
+    });
+    const validAwayGoals = awayGoals.filter(id => {
+      const player = allPlayers.find(p => p.id === id);
+      return player && !player.isTemporary;
+    });
+    
     onSave({
       homeTeamId,
       awayTeamId,
       homeScore,
       awayScore,
       matchDate,
-      homeGoals,
-      awayGoals,
+      homeGoals: validHomeGoals,
+      awayGoals: validAwayGoals,
     });
     onOpenChange(false);
   };
 
-  const handleOpenPlayerModal = (team: "home" | "away") => {
+  const handleOpenPlayerModal = (team: "home" | "away", positionIndex: number, forGoal = false) => {
     setSelectingForTeam(team);
+    setSelectingPosition(positionIndex);
+    setSelectingForGoal(forGoal);
     setPlayerModalOpen(true);
   };
 
   const handlePlayerSelected = (playerId: string) => {
-    if (selectingForTeam === "home") {
-      setHomeGoals((prev) => [...prev, playerId]);
-      setHomePlayers((prev) => 
-        prev.includes(playerId) ? prev : [...prev, playerId]
-      );
+    if (selectingForGoal) {
+      // Adding a goal scorer
+      if (selectingForTeam === "home") {
+        setHomeGoals((prev) => [...prev, playerId]);
+        setHomeScore((prev) => prev + 1);
+      } else {
+        setAwayGoals((prev) => [...prev, playerId]);
+        setAwayScore((prev) => prev + 1);
+      }
     } else {
-      setAwayGoals((prev) => [...prev, playerId]);
-      setAwayPlayers((prev) => 
-        prev.includes(playerId) ? prev : [...prev, playerId]
-      );
+      // Adding to pitch
+      if (selectingForTeam === "home") {
+        setHomePitchPlayers((prev) => {
+          // Remove any existing player at this position
+          const filtered = prev.filter((p) => p.positionIndex !== selectingPosition);
+          return [...filtered, { id: playerId, positionIndex: selectingPosition }];
+        });
+      } else {
+        setAwayPitchPlayers((prev) => {
+          const filtered = prev.filter((p) => p.positionIndex !== selectingPosition);
+          return [...filtered, { id: playerId, positionIndex: selectingPosition }];
+        });
+      }
     }
   };
+
+  const handleRemoveFromPitch = (team: "home" | "away", playerId: string) => {
+    if (team === "home") {
+      setHomePitchPlayers((prev) => prev.filter((p) => p.id !== playerId));
+    } else {
+      setAwayPitchPlayers((prev) => prev.filter((p) => p.id !== playerId));
+    }
+  };
+
+  const handleAddTemporaryPlayer = useCallback((name: string): string => {
+    const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+    const tempPlayer: Player = {
+      id: tempId,
+      name,
+      default_team_id: null,
+      isTemporary: true,
+    };
+    setAllPlayers((prev) => [...prev, tempPlayer]);
+    return tempId;
+  }, []);
 
   const removeGoal = (team: "home" | "away", index: number) => {
     if (team === "home") {
       setHomeGoals((prev) => prev.filter((_, i) => i !== index));
+      setHomeScore((prev) => Math.max(0, prev - 1));
     } else {
       setAwayGoals((prev) => prev.filter((_, i) => i !== index));
+      setAwayScore((prev) => Math.max(0, prev - 1));
+    }
+  };
+
+  const adjustScore = (team: "home" | "away", delta: number) => {
+    if (team === "home") {
+      const newScore = Math.max(0, homeScore + delta);
+      setHomeScore(newScore);
+      // If decreasing and there are more goals than score, remove last goal
+      if (delta < 0 && homeGoals.length > newScore) {
+        setHomeGoals((prev) => prev.slice(0, newScore));
+      }
+    } else {
+      const newScore = Math.max(0, awayScore + delta);
+      setAwayScore(newScore);
+      if (delta < 0 && awayGoals.length > newScore) {
+        setAwayGoals((prev) => prev.slice(0, newScore));
+      }
     }
   };
 
   const getPlayerName = (playerId: string) => {
-    const player = players.find((p) => p.id === playerId);
+    const player = allPlayers.find((p) => p.id === playerId);
     return player?.name?.split(" ")[0] || "Player";
   };
 
@@ -188,140 +261,165 @@ const AddResultDialog = ({
 
           <ScrollArea className="max-h-[calc(95vh-80px)]">
             <div className="px-4 pb-4 space-y-4">
-              {/* Team selector with score */}
-              <div className="flex items-center gap-3">
-                <Select value={homeTeamId} onValueChange={setHomeTeamId}>
-                  <SelectTrigger className="flex-1">
-                    <SelectValue placeholder="Select team" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-popover">
-                    {teams.map((team) => (
-                      <SelectItem key={team.id} value={team.id}>
-                        {team.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              {/* Team selectors with scores */}
+              <div className="space-y-3">
+                {/* Home team */}
+                <div className="flex items-center gap-3">
+                  <Select value={homeTeamId} onValueChange={setHomeTeamId}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Home team" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                <div className="flex items-center gap-1 bg-muted rounded-lg px-2">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setHomeScore(Math.max(0, homeScore - 1))}
-                  >
-                    <Minus className="w-4 h-4" />
-                  </Button>
-                  <span className="text-lg font-bold w-6 text-center">{homeScore}</span>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8"
-                    onClick={() => setHomeScore(homeScore + 1)}
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                  <div className="flex items-center gap-1 bg-muted rounded-lg px-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => adjustScore("home", -1)}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="text-xl font-bold w-8 text-center">{homeScore}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => adjustScore("home", 1)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Away team */}
+                <div className="flex items-center gap-3">
+                  <Select value={awayTeamId} onValueChange={setAwayTeamId}>
+                    <SelectTrigger className="flex-1">
+                      <SelectValue placeholder="Away team" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-popover">
+                      {teams.map((team) => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  <div className="flex items-center gap-1 bg-muted rounded-lg px-2">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => adjustScore("away", -1)}
+                    >
+                      <Minus className="w-4 h-4" />
+                    </Button>
+                    <span className="text-xl font-bold w-8 text-center">{awayScore}</span>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => adjustScore("away", 1)}
+                    >
+                      <Plus className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
               </div>
-
-              {/* Add team button */}
-              <Button
-                variant="outline"
-                className="w-full gap-2 border-dashed border-primary text-primary hover:bg-primary/5"
-                onClick={() => handleOpenPlayerModal("home")}
-              >
-                Add team
-                <Plus className="w-4 h-4" />
-              </Button>
 
               {/* Football pitch */}
               <FootballPitch
-                teamId={homeTeamId}
-                teamName={homeTeam?.name || "Home"}
-                selectedPlayers={homePlayers}
-                allPlayers={players}
-                onAddPlayer={() => handleOpenPlayerModal("home")}
-                onRemovePlayer={(id) => {
-                  setHomePlayers((prev) => prev.filter((p) => p !== id));
-                }}
+                homeTeamName={homeTeam?.name || "Home"}
+                awayTeamName={awayTeam?.name || "Away"}
+                homePlayers={homePitchPlayers}
+                awayPlayers={awayPitchPlayers}
+                allPlayers={allPlayers}
+                onAddPlayer={(team, posIndex) => handleOpenPlayerModal(team, posIndex, false)}
+                onRemovePlayer={handleRemoveFromPitch}
               />
 
-              {/* Score display */}
-              <div className="flex items-center justify-center gap-6 py-2">
-                <div className="text-center">
-                  <span className="font-semibold text-lg">{homeTeam?.name || "Home"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <ArrowLeft className="w-5 h-5 text-success" />
-                  <ArrowRight className="w-5 h-5 text-destructive" />
-                </div>
-                <div className="text-center">
-                  <span className="font-semibold text-lg">{awayTeam?.name || "Away"}</span>
-                </div>
-              </div>
-
               {/* Goal scorers section */}
-              <div className="grid grid-cols-2 gap-4">
-                {/* Home goals */}
-                <div className="space-y-2">
-                  {homeGoals.map((playerId, index) => (
-                    <div
-                      key={`home-${playerId}-${index}`}
-                      className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-team-home flex items-center justify-center">
-                        <User className="w-3 h-3 text-white" />
-                      </div>
-                      <span className="text-sm flex-1 truncate">{getPlayerName(playerId)}</span>
-                      <button
-                        onClick={() => removeGoal("home", index)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+              <div className="space-y-3">
+                <Label className="text-sm font-medium">Goal Scorers</Label>
+                <div className="grid grid-cols-2 gap-4">
+                  {/* Home goals */}
+                  <div className="space-y-2">
+                    <div className="text-xs text-muted-foreground text-center mb-2">
+                      {homeTeam?.name || "Home"}
                     </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-1 text-xs"
-                    onClick={() => handleOpenPlayerModal("home")}
-                  >
-                    <Plus className="w-3 h-3" />
-                    New player
-                  </Button>
-                </div>
+                    {homeGoals.map((playerId, index) => (
+                      <div
+                        key={`home-${playerId}-${index}`}
+                        className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-team-home flex items-center justify-center">
+                          <User className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-sm flex-1 truncate">{getPlayerName(playerId)}</span>
+                        <button
+                          onClick={() => removeGoal("home", index)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1 text-xs"
+                      onClick={() => handleOpenPlayerModal("home", 0, true)}
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add scorer
+                    </Button>
+                  </div>
 
-                {/* Away goals */}
-                <div className="space-y-2">
-                  {awayGoals.map((playerId, index) => (
-                    <div
-                      key={`away-${playerId}-${index}`}
-                      className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
-                    >
-                      <div className="w-6 h-6 rounded-full bg-team-away flex items-center justify-center">
-                        <User className="w-3 h-3 text-white" />
-                      </div>
-                      <span className="text-sm flex-1 truncate">{getPlayerName(playerId)}</span>
-                      <button
-                        onClick={() => removeGoal("away", index)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        <X className="w-4 h-4" />
-                      </button>
+                  {/* Away goals */}
+                  <div className="space-y-2">
+                    <div className="text-xs text-muted-foreground text-center mb-2">
+                      {awayTeam?.name || "Away"}
                     </div>
-                  ))}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="w-full gap-1 text-xs"
-                    onClick={() => handleOpenPlayerModal("away")}
-                  >
-                    <Plus className="w-3 h-3" />
-                    New player
-                  </Button>
+                    {awayGoals.map((playerId, index) => (
+                      <div
+                        key={`away-${playerId}-${index}`}
+                        className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-team-away flex items-center justify-center">
+                          <User className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-sm flex-1 truncate">{getPlayerName(playerId)}</span>
+                        <button
+                          onClick={() => removeGoal("away", index)}
+                          className="text-muted-foreground hover:text-destructive"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full gap-1 text-xs"
+                      onClick={() => handleOpenPlayerModal("away", 0, true)}
+                    >
+                      <Plus className="w-3 h-3" />
+                      Add scorer
+                    </Button>
+                  </div>
                 </div>
               </div>
 
@@ -348,9 +446,10 @@ const AddResultDialog = ({
         open={playerModalOpen}
         onOpenChange={setPlayerModalOpen}
         teams={teams}
-        players={players}
+        players={allPlayers}
         selectedTeamId={selectingForTeam === "home" ? homeTeamId : awayTeamId}
         onSelectPlayer={handlePlayerSelected}
+        onAddTemporaryPlayer={handleAddTemporaryPlayer}
       />
     </>
   );

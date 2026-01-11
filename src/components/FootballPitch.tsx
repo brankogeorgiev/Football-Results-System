@@ -4,52 +4,120 @@ import { Button } from "@/components/ui/button";
 interface Player {
   id: string;
   name: string;
-  default_team_id: string | null;
+  isTemporary?: boolean;
+}
+
+interface PitchPlayer {
+  id: string;
+  positionIndex: number;
 }
 
 interface FootballPitchProps {
-  teamId: string;
-  teamName: string;
-  selectedPlayers: string[];
+  homeTeamName: string;
+  awayTeamName: string;
+  homePlayers: PitchPlayer[];
+  awayPlayers: PitchPlayer[];
   allPlayers: Player[];
-  onAddPlayer: () => void;
-  onRemovePlayer: (playerId: string) => void;
+  onAddPlayer: (team: "home" | "away", positionIndex: number) => void;
+  onRemovePlayer: (team: "home" | "away", playerId: string) => void;
 }
 
-// Formation positions (4-3-3)
-const POSITIONS = [
+// 6-a-side formation (1 GK + 5 outfield) for each team
+// Positions are defined as percentages of the pitch
+const HOME_POSITIONS = [
   // Goalkeeper
-  { x: 50, y: 90 },
+  { x: 50, y: 88, label: "GK" },
   // Defenders
-  { x: 15, y: 72 },
-  { x: 38, y: 75 },
-  { x: 62, y: 75 },
-  { x: 85, y: 72 },
+  { x: 25, y: 72, label: "DEF" },
+  { x: 75, y: 72, label: "DEF" },
   // Midfielders
-  { x: 25, y: 50 },
-  { x: 50, y: 55 },
-  { x: 75, y: 50 },
-  // Forwards
-  { x: 20, y: 25 },
-  { x: 50, y: 20 },
-  { x: 80, y: 25 },
+  { x: 20, y: 55, label: "MID" },
+  { x: 50, y: 52, label: "MID" },
+  { x: 80, y: 55, label: "MID" },
+];
+
+const AWAY_POSITIONS = [
+  // Goalkeeper
+  { x: 50, y: 12, label: "GK" },
+  // Defenders
+  { x: 25, y: 28, label: "DEF" },
+  { x: 75, y: 28, label: "DEF" },
+  // Midfielders
+  { x: 20, y: 45, label: "MID" },
+  { x: 50, y: 48, label: "MID" },
+  { x: 80, y: 45, label: "MID" },
 ];
 
 const FootballPitch = ({
-  teamId,
-  teamName,
-  selectedPlayers,
+  homeTeamName,
+  awayTeamName,
+  homePlayers,
+  awayPlayers,
   allPlayers,
   onAddPlayer,
   onRemovePlayer,
 }: FootballPitchProps) => {
   const getPlayerName = (playerId: string) => {
     const player = allPlayers.find((p) => p.id === playerId);
-    return player?.name?.split(" ")[0] || "Player";
+    if (!player) return "Player";
+    const names = player.name.split(" ");
+    return names[0].substring(0, 8);
+  };
+
+  const getPlayerAtPosition = (team: "home" | "away", positionIndex: number) => {
+    const players = team === "home" ? homePlayers : awayPlayers;
+    return players.find((p) => p.positionIndex === positionIndex);
+  };
+
+  const renderPosition = (
+    team: "home" | "away",
+    position: { x: number; y: number; label: string },
+    positionIndex: number
+  ) => {
+    const player = getPlayerAtPosition(team, positionIndex);
+    const isHome = team === "home";
+    const bgColor = isHome ? "bg-team-home" : "bg-team-away";
+
+    return (
+      <div
+        key={`${team}-${positionIndex}`}
+        className="absolute transform -translate-x-1/2 -translate-y-1/2"
+        style={{
+          left: `${position.x}%`,
+          top: `${position.y}%`,
+        }}
+      >
+        {player ? (
+          <button
+            onClick={() => onRemovePlayer(team, player.id)}
+            className="flex flex-col items-center group"
+          >
+            <div
+              className={`w-9 h-9 rounded-full ${bgColor} flex items-center justify-center shadow-lg border-2 border-white/40 group-hover:border-destructive transition-colors`}
+            >
+              <User className="w-5 h-5 text-white" />
+            </div>
+            <span className="text-[10px] text-white font-medium mt-0.5 bg-black/40 px-1.5 py-0.5 rounded max-w-[60px] truncate">
+              {getPlayerName(player.id)}
+            </span>
+          </button>
+        ) : (
+          <button
+            onClick={() => onAddPlayer(team, positionIndex)}
+            className="flex flex-col items-center group"
+          >
+            <div className="w-9 h-9 rounded-full bg-white/20 border-2 border-dashed border-white/50 flex items-center justify-center hover:bg-white/30 transition-colors">
+              <Plus className="w-4 h-4 text-white/70" />
+            </div>
+            <span className="text-[9px] text-white/60 mt-0.5">{position.label}</span>
+          </button>
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="relative w-full aspect-[3/4] max-h-[350px] rounded-lg overflow-hidden">
+    <div className="relative w-full aspect-[3/4] max-h-[400px] rounded-lg overflow-hidden">
       {/* Pitch background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[hsl(142,60%,45%)] to-[hsl(142,55%,35%)]">
         {/* Pitch markings */}
@@ -128,52 +196,26 @@ const FootballPitch = ({
         </svg>
       </div>
 
-      {/* Add goalscorer button - top */}
-      <Button
-        variant="secondary"
-        size="sm"
-        className="absolute top-2 right-2 z-10 text-xs bg-primary/90 text-primary-foreground hover:bg-primary"
-        onClick={onAddPlayer}
-      >
-        Add goalscorer
-      </Button>
+      {/* Team labels */}
+      <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10">
+        <span className="text-[10px] font-medium text-white/80 bg-black/30 px-2 py-0.5 rounded">
+          {awayTeamName}
+        </span>
+      </div>
+      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-10">
+        <span className="text-[10px] font-medium text-white/80 bg-black/30 px-2 py-0.5 rounded">
+          {homeTeamName}
+        </span>
+      </div>
 
       {/* Players on pitch */}
       <div className="absolute inset-0">
-        {selectedPlayers.slice(0, 11).map((playerId, index) => {
-          const pos = POSITIONS[index];
-          return (
-            <button
-              key={playerId}
-              onClick={() => onRemovePlayer(playerId)}
-              className="absolute transform -translate-x-1/2 -translate-y-1/2 group"
-              style={{
-                left: `${pos.x}%`,
-                top: `${pos.y}%`,
-              }}
-            >
-              <div className="flex flex-col items-center">
-                <div className="w-9 h-9 rounded-full bg-team-home flex items-center justify-center shadow-lg border-2 border-white/30 group-hover:border-destructive transition-colors">
-                  <User className="w-5 h-5 text-white" />
-                </div>
-                <span className="text-[10px] text-white font-medium mt-0.5 bg-black/30 px-1.5 py-0.5 rounded max-w-[60px] truncate">
-                  {getPlayerName(playerId)}
-                </span>
-              </div>
-            </button>
-          );
-        })}
+        {/* Home team positions (bottom half) */}
+        {HOME_POSITIONS.map((pos, index) => renderPosition("home", pos, index))}
+        
+        {/* Away team positions (top half) */}
+        {AWAY_POSITIONS.map((pos, index) => renderPosition("away", pos, index))}
       </div>
-
-      {/* Add goalscorer button - bottom */}
-      <Button
-        variant="secondary"
-        size="sm"
-        className="absolute bottom-2 left-2 z-10 text-xs bg-primary/90 text-primary-foreground hover:bg-primary"
-        onClick={onAddPlayer}
-      >
-        Add goalscorer
-      </Button>
     </div>
   );
 };
