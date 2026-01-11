@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { Plus, Minus, X, User } from "lucide-react";
+import { Plus, Minus, X, User, CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 import {
   Dialog,
   DialogContent,
@@ -14,9 +15,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import FootballPitch from "./FootballPitch";
 import PlayerSelectModal from "./PlayerSelectModal";
 
@@ -83,9 +90,7 @@ const AddResultDialog = ({
   const [awayTeamId, setAwayTeamId] = useState<string>("");
   const [homeScore, setHomeScore] = useState(0);
   const [awayScore, setAwayScore] = useState(0);
-  const [matchDate, setMatchDate] = useState(
-    new Date().toISOString().split("T")[0]
-  );
+  const [matchDate, setMatchDate] = useState<Date>(new Date());
   const [homeGoals, setHomeGoals] = useState<string[]>([]);
   const [awayGoals, setAwayGoals] = useState<string[]>([]);
   const [homePitchPlayers, setHomePitchPlayers] = useState<PitchPlayer[]>([]);
@@ -109,7 +114,7 @@ const AddResultDialog = ({
       setAwayTeamId(editMatch.away_team_id);
       setHomeScore(editMatch.home_score);
       setAwayScore(editMatch.away_score);
-      setMatchDate(editMatch.match_date);
+      setMatchDate(new Date(editMatch.match_date));
 
       const homeGoalsList = existingGoals
         .filter((g) => g.team_id === editMatch.home_team_id)
@@ -127,7 +132,7 @@ const AddResultDialog = ({
       setAwayTeamId(teams[1]?.id || "");
       setHomeScore(0);
       setAwayScore(0);
-      setMatchDate(new Date().toISOString().split("T")[0]);
+      setMatchDate(new Date());
       setHomeGoals([]);
       setAwayGoals([]);
       setHomePitchPlayers([]);
@@ -153,7 +158,7 @@ const AddResultDialog = ({
       awayTeamId,
       homeScore,
       awayScore,
-      matchDate,
+      matchDate: format(matchDate, "yyyy-MM-dd"),
       homeGoals: validHomeGoals,
       awayGoals: validAwayGoals,
     });
@@ -169,13 +174,19 @@ const AddResultDialog = ({
 
   const handlePlayerSelected = (playerId: string) => {
     if (selectingForGoal) {
-      // Adding a goal scorer
+      // Adding a goal scorer - only increase score if goalscorers exceed current score
       if (selectingForTeam === "home") {
-        setHomeGoals((prev) => [...prev, playerId]);
-        setHomeScore((prev) => prev + 1);
+        const newGoals = [...homeGoals, playerId];
+        setHomeGoals(newGoals);
+        if (newGoals.length > homeScore) {
+          setHomeScore(newGoals.length);
+        }
       } else {
-        setAwayGoals((prev) => [...prev, playerId]);
-        setAwayScore((prev) => prev + 1);
+        const newGoals = [...awayGoals, playerId];
+        setAwayGoals(newGoals);
+        if (newGoals.length > awayScore) {
+          setAwayScore(newGoals.length);
+        }
       }
     } else {
       // Adding to pitch
@@ -426,11 +437,30 @@ const AddResultDialog = ({
               {/* Date picker */}
               <div className="space-y-2">
                 <Label>Match Date</Label>
-                <Input
-                  type="date"
-                  value={matchDate}
-                  onChange={(e) => setMatchDate(e.target.value)}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !matchDate && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {matchDate ? format(matchDate, "PPP") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={matchDate}
+                      onSelect={(date) => date && setMatchDate(date)}
+                      disabled={(date) => date > new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
 
               {/* Save button */}
