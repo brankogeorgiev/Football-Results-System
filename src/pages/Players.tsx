@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/hooks/useAuth";
 import PlayerCard from "@/components/PlayerCard";
 import PlayerDialog from "@/components/PlayerDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
@@ -21,6 +22,7 @@ const Players = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const { data: players, isLoading: playersLoading } = usePlayers();
   const { data: teams, isLoading: teamsLoading } = useTeams();
@@ -73,10 +75,12 @@ const Players = () => {
           <h2 className="font-display font-bold text-xl text-foreground">
             Players
           </h2>
-          <Button onClick={handleAddPlayer} size="sm" className="gap-1">
-            <Plus className="w-4 h-4" />
-            Add player
-          </Button>
+          {user && (
+            <Button onClick={handleAddPlayer} size="sm" className="gap-1">
+              <Plus className="w-4 h-4" />
+              Add player
+            </Button>
+          )}
         </div>
 
         {/* Players list */}
@@ -106,15 +110,18 @@ const Players = () => {
                 defaultTeamName={player.default_team?.name}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                showActions={!!user}
               />
             ))
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">No players added yet</p>
-              <Button onClick={handleAddPlayer} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add your first player
-              </Button>
+              {user && (
+                <Button onClick={handleAddPlayer} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add your first player
+                </Button>
+              )}
             </div>
           )}
         </div>
