@@ -10,6 +10,7 @@ interface ResultCardProps {
   matchDate: string;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  showActions?: boolean;
 }
 
 const ResultCard = ({
@@ -21,6 +22,7 @@ const ResultCard = ({
   matchDate,
   onEdit,
   onDelete,
+  showActions = true,
 }: ResultCardProps) => {
   return (
     <div className="result-card animate-fade-in">
@@ -35,22 +37,24 @@ const ResultCard = ({
           <span className="team-name min-w-[60px]">{awayTeam}</span>
         </div>
         
-        <div className="flex items-center gap-1 ml-4">
-          <button
-            onClick={() => onEdit(id)}
-            className="icon-button-edit"
-            aria-label="Edit match"
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDelete(id)}
-            className="icon-button-delete"
-            aria-label="Delete match"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
+        {showActions && (
+          <div className="flex items-center gap-1 ml-4">
+            <button
+              onClick={() => onEdit(id)}
+              className="icon-button-edit"
+              aria-label="Edit match"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onDelete(id)}
+              className="icon-button-delete"
+              aria-label="Delete match"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
       
       <div className="mt-2 text-right">

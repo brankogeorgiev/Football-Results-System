@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
+import { useAuth } from "@/hooks/useAuth";
 import ResultCard from "@/components/ResultCard";
 import AddResultDialog from "@/components/AddResultDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
@@ -23,6 +24,7 @@ const Index = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editMatch, setEditMatch] = useState<Match | null>(null);
   const [deleteMatchId, setDeleteMatchId] = useState<string | null>(null);
+  const { user } = useAuth();
 
   const { data: matches, isLoading: matchesLoading } = useMatches();
   const { data: teams, isLoading: teamsLoading } = useTeams();
@@ -132,10 +134,12 @@ const Index = () => {
           <h2 className="font-display font-bold text-xl text-foreground">
             Past Results
           </h2>
-          <Button onClick={handleAddResult} size="sm" className="gap-1">
-            <Plus className="w-4 h-4" />
-            Add result
-          </Button>
+          {user && (
+            <Button onClick={handleAddResult} size="sm" className="gap-1">
+              <Plus className="w-4 h-4" />
+              Add result
+            </Button>
+          )}
         </div>
 
         {/* Results list */}
@@ -174,6 +178,7 @@ const Index = () => {
                 matchDate={match.match_date}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                showActions={!!user}
               />
             ))
           ) : (
@@ -181,10 +186,12 @@ const Index = () => {
               <p className="text-muted-foreground mb-4">
                 No matches recorded yet
               </p>
-              <Button onClick={handleAddResult} variant="outline">
-                <Plus className="w-4 h-4 mr-2" />
-                Add your first result
-              </Button>
+              {user && (
+                <Button onClick={handleAddResult} variant="outline">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add your first result
+                </Button>
+              )}
             </div>
           )}
         </div>

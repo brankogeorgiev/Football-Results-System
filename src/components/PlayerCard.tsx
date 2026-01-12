@@ -7,9 +7,10 @@ interface PlayerCardProps {
   defaultTeamName?: string | null;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  showActions?: boolean;
 }
 
-const PlayerCard = ({ id, name, defaultTeamName, onEdit, onDelete }: PlayerCardProps) => {
+const PlayerCard = ({ id, name, defaultTeamName, onEdit, onDelete, showActions = true }: PlayerCardProps) => {
   return (
     <div className="result-card animate-fade-in">
       <div className="flex items-center justify-between">
@@ -27,22 +28,24 @@ const PlayerCard = ({ id, name, defaultTeamName, onEdit, onDelete }: PlayerCardP
           </div>
         </div>
 
-        <div className="flex items-center gap-1">
-          <button
-            onClick={() => onEdit(id)}
-            className="icon-button-edit"
-            aria-label="Edit player"
-          >
-            <Pencil className="w-4 h-4" />
-          </button>
-          <button
-            onClick={() => onDelete(id)}
-            className="icon-button-delete"
-            aria-label="Delete player"
-          >
-            <Trash2 className="w-4 h-4" />
-          </button>
-        </div>
+        {showActions && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onEdit(id)}
+              className="icon-button-edit"
+              aria-label="Edit player"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => onDelete(id)}
+              className="icon-button-delete"
+              aria-label="Delete player"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
