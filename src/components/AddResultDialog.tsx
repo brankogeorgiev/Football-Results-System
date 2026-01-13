@@ -225,6 +225,19 @@ const AddResultDialog = ({
     }
   };
 
+  const handleChangePlayerOnPitch = (team: "home" | "away", positionIndex: number, currentPlayerId: string) => {
+    // Remove current player first, then open modal to select new one
+    handleRemoveFromPitch(team, currentPlayerId);
+    handleOpenPlayerModal(team, positionIndex, false);
+  };
+
+  // Get players already on pitch (both teams) to exclude from selection
+  const getPlayersOnPitch = () => {
+    const homeIds = homePitchPlayers.map(p => p.id);
+    const awayIds = awayPitchPlayers.map(p => p.id);
+    return [...homeIds, ...awayIds];
+  };
+
   const handleAddTemporaryPlayer = useCallback((name: string): string => {
     const tempId = `temp-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
     const tempPlayer: Player = {
@@ -372,6 +385,7 @@ const AddResultDialog = ({
                 allPlayers={allPlayers}
                 onAddPlayer={(team, posIndex) => handleOpenPlayerModal(team, posIndex, false)}
                 onRemovePlayer={handleRemoveFromPitch}
+                onChangePlayer={handleChangePlayerOnPitch}
               />
 
               {/* Goal scorers section */}
@@ -492,6 +506,7 @@ const AddResultDialog = ({
         selectedTeamId={selectingForTeam === "home" ? homeTeamId : awayTeamId}
         onSelectPlayer={handlePlayerSelected}
         onAddTemporaryPlayer={handleAddTemporaryPlayer}
+        excludePlayerIds={selectingForGoal ? [] : getPlayersOnPitch()}
       />
     </>
   );
