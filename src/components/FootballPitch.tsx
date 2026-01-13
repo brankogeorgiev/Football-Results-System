@@ -1,4 +1,10 @@
-import { Plus, User } from "lucide-react";
+import { useState } from "react";
+import { Plus, User, RefreshCw, X } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 
 interface Player {
@@ -20,6 +26,7 @@ interface FootballPitchProps {
   allPlayers: Player[];
   onAddPlayer: (team: "home" | "away", positionIndex: number) => void;
   onRemovePlayer: (team: "home" | "away", playerId: string) => void;
+  onChangePlayer: (team: "home" | "away", positionIndex: number, currentPlayerId: string) => void;
 }
 
 // 6-a-side formation (1 GK + 2 DEF + 2 MID + 1 FWD) for each team
@@ -58,7 +65,9 @@ const FootballPitch = ({
   allPlayers,
   onAddPlayer,
   onRemovePlayer,
+  onChangePlayer,
 }: FootballPitchProps) => {
+  const [openPopover, setOpenPopover] = useState<string | null>(null);
   const getPlayerName = (playerId: string) => {
     const player = allPlayers.find((p) => p.id === playerId);
     if (!player) return "Player";
@@ -79,10 +88,11 @@ const FootballPitch = ({
     const player = getPlayerAtPosition(team, positionIndex);
     const isHome = team === "home";
     const bgColor = isHome ? "bg-team-home" : "bg-team-away";
+    const popoverId = `${team}-${positionIndex}`;
 
     return (
       <div
-        key={`${team}-${positionIndex}`}
+        key={popoverId}
         className="absolute transform -translate-x-1/2 -translate-y-1/2"
         style={{
           left: `${position.x}%`,
@@ -90,19 +100,48 @@ const FootballPitch = ({
         }}
       >
         {player ? (
-          <button
-            onClick={() => onRemovePlayer(team, player.id)}
-            className="flex flex-col items-center group"
-          >
-            <div
-              className={`w-9 h-9 rounded-full ${bgColor} flex items-center justify-center shadow-lg border-2 border-white/40 group-hover:border-destructive transition-colors`}
-            >
-              <User className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-[10px] text-white font-medium mt-0.5 bg-black/40 px-1.5 py-0.5 rounded max-w-[60px] truncate">
-              {getPlayerName(player.id)}
-            </span>
-          </button>
+          <Popover open={openPopover === popoverId} onOpenChange={(open) => setOpenPopover(open ? popoverId : null)}>
+            <PopoverTrigger asChild>
+              <button className="flex flex-col items-center group">
+                <div
+                  className={`w-9 h-9 rounded-full ${bgColor} flex items-center justify-center shadow-lg border-2 border-white/40 group-hover:border-white transition-colors`}
+                >
+                  <User className="w-5 h-5 text-white" />
+                </div>
+                <span className="text-[10px] text-white font-medium mt-0.5 bg-black/40 px-1.5 py-0.5 rounded max-w-[60px] truncate">
+                  {getPlayerName(player.id)}
+                </span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-2" side="top" align="center">
+              <div className="flex flex-col gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="justify-start gap-2"
+                  onClick={() => {
+                    setOpenPopover(null);
+                    onChangePlayer(team, positionIndex, player.id);
+                  }}
+                >
+                  <RefreshCw className="w-4 h-4" />
+                  Change
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="justify-start gap-2 text-destructive hover:text-destructive"
+                  onClick={() => {
+                    setOpenPopover(null);
+                    onRemovePlayer(team, player.id);
+                  }}
+                >
+                  <X className="w-4 h-4" />
+                  Remove
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
         ) : (
           <button
             onClick={() => onAddPlayer(team, positionIndex)}

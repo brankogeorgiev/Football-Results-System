@@ -31,6 +31,7 @@ interface PlayerSelectModalProps {
   selectedTeamId: string;
   onSelectPlayer: (playerId: string) => void;
   onAddTemporaryPlayer: (name: string) => string; // Returns the temp player ID
+  excludePlayerIds?: string[]; // Players to exclude from selection (already on pitch)
 }
 
 const PlayerSelectModal = ({
@@ -41,6 +42,7 @@ const PlayerSelectModal = ({
   selectedTeamId,
   onSelectPlayer,
   onAddTemporaryPlayer,
+  excludePlayerIds = [],
 }: PlayerSelectModalProps) => {
   const [activeTab, setActiveTab] = useState(selectedTeamId || "all");
   const [showNewPlayerInput, setShowNewPlayerInput] = useState(false);
@@ -59,12 +61,13 @@ const PlayerSelectModal = ({
     onOpenChange(open);
   };
 
-  // Get players filtered by team
+  // Get players filtered by team, excluding those already on pitch
   const getPlayersForTeam = (teamId: string) => {
+    let filtered = players.filter(p => !excludePlayerIds.includes(p.id));
     if (teamId === "all") {
-      return players.sort((a, b) => a.name.localeCompare(b.name));
+      return filtered.sort((a, b) => a.name.localeCompare(b.name));
     }
-    return players
+    return filtered
       .filter((p) => p.default_team_id === teamId)
       .sort((a, b) => a.name.localeCompare(b.name));
   };
