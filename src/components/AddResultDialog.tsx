@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Plus, Minus, X, User, CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import {
@@ -108,7 +108,19 @@ const AddResultDialog = ({
     setAllPlayers(initialPlayers);
   }, [initialPlayers]);
 
+  const initializedForOpenRef = useRef(false);
+
   useEffect(() => {
+    // Prevent resetting user edits while the dialog is open.
+    // We only initialize once per open.
+    if (!open) {
+      initializedForOpenRef.current = false;
+      return;
+    }
+
+    if (initializedForOpenRef.current) return;
+    initializedForOpenRef.current = true;
+
     if (editMatch) {
       setHomeTeamId(editMatch.home_team_id);
       setAwayTeamId(editMatch.away_team_id);
@@ -138,7 +150,7 @@ const AddResultDialog = ({
       setHomePitchPlayers([]);
       setAwayPitchPlayers([]);
     }
-  }, [editMatch, teams, open, existingGoals]);
+  }, [open, editMatch, teams, existingGoals]);
 
   const handleSave = () => {
     if (!homeTeamId || !awayTeamId) return;
