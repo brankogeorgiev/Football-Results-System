@@ -22,30 +22,32 @@ interface FootballPitchProps {
   onRemovePlayer: (team: "home" | "away", playerId: string) => void;
 }
 
-// 6-a-side formation (1 GK + 5 outfield) for each team
+// 6-a-side formation (1 GK + 2 DEF + 2 MID + 1 FWD) for each team
 // Positions are defined as percentages of the pitch
 const HOME_POSITIONS = [
   // Goalkeeper
-  { x: 50, y: 88, label: "GK" },
-  // Defenders
-  { x: 25, y: 72, label: "DEF" },
-  { x: 75, y: 72, label: "DEF" },
-  // Midfielders
-  { x: 20, y: 55, label: "MID" },
-  { x: 50, y: 52, label: "MID" },
-  { x: 80, y: 55, label: "MID" },
+  { x: 50, y: 92, label: "GK" },
+  // Defenders (spread wider)
+  { x: 25, y: 78, label: "DEF" },
+  { x: 75, y: 78, label: "DEF" },
+  // Midfielders (spread wider)
+  { x: 25, y: 62, label: "MID" },
+  { x: 75, y: 62, label: "MID" },
+  // Forward
+  { x: 50, y: 52, label: "FWD" },
 ];
 
 const AWAY_POSITIONS = [
   // Goalkeeper
-  { x: 50, y: 12, label: "GK" },
-  // Defenders
-  { x: 25, y: 28, label: "DEF" },
-  { x: 75, y: 28, label: "DEF" },
-  // Midfielders
-  { x: 20, y: 45, label: "MID" },
-  { x: 50, y: 48, label: "MID" },
-  { x: 80, y: 45, label: "MID" },
+  { x: 50, y: 8, label: "GK" },
+  // Defenders (spread wider)
+  { x: 25, y: 22, label: "DEF" },
+  { x: 75, y: 22, label: "DEF" },
+  // Midfielders (spread wider)
+  { x: 25, y: 38, label: "MID" },
+  { x: 75, y: 38, label: "MID" },
+  // Forward
+  { x: 50, y: 48, label: "FWD" },
 ];
 
 const FootballPitch = ({
