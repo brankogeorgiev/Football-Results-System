@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Plus, User } from "lucide-react";
 import {
   Dialog,
@@ -45,6 +45,10 @@ const PlayerSelectModal = ({
   const [activeTab, setActiveTab] = useState(selectedTeamId || "all");
   const [showNewPlayerInput, setShowNewPlayerInput] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
+
+  useEffect(() => {
+    if (open) setActiveTab(selectedTeamId || "all");
+  }, [open, selectedTeamId]);
 
   // Reset state when modal opens
   const handleOpenChange = (open: boolean) => {
