@@ -98,7 +98,17 @@ const FootballPitch = ({
   ) => {
     const player = getPlayerAtPosition(team, positionIndex);
     const isHome = team === "home";
-    const bgColor = isHome ? "bg-team-home" : "bg-team-away";
+    const isGoalkeeper = positionIndex === 0; // GK is always position 0
+    
+    // Different colors for GK vs field players
+    const bgColor = isGoalkeeper 
+      ? (isHome ? "bg-team-home-gk" : "bg-team-away-gk")
+      : (isHome ? "bg-team-home" : "bg-team-away");
+    
+    const textColor = isGoalkeeper 
+      ? "text-white" 
+      : (isHome ? "text-purple-600" : "text-white");
+    
     const popoverId = `${team}-${positionIndex}`;
 
     return (
@@ -115,9 +125,9 @@ const FootballPitch = ({
             <PopoverTrigger asChild>
               <button className="flex flex-col items-center group">
                 <div
-                  className={`w-9 h-9 rounded-full ${bgColor} flex items-center justify-center shadow-lg border-2 border-white/40 group-hover:border-white transition-colors`}
+                  className={`w-9 h-9 rounded-full ${bgColor} flex items-center justify-center shadow-lg border-2 group-hover:border-white/80 transition-colors`}
                 >
-                  <User className="w-5 h-5 text-white" />
+                  <User className={`w-5 h-5 ${textColor}`} />
                 </div>
                 <span className="text-[10px] text-white font-medium mt-0.5 bg-black/40 px-1.5 py-0.5 rounded max-w-[60px] truncate">
                   {getPlayerName(player.id)}
@@ -169,7 +179,7 @@ const FootballPitch = ({
   };
 
   return (
-    <div className="relative w-full aspect-[3/4] max-h-[400px] rounded-lg overflow-hidden">
+    <div className="relative w-full aspect-[3/4] max-h-[400px] rounded-lg overflow-visible my-8">
       {/* Pitch background */}
       <div className="absolute inset-0 bg-gradient-to-b from-[hsl(142,60%,45%)] to-[hsl(142,55%,35%)]">
         {/* Pitch markings */}
@@ -248,14 +258,14 @@ const FootballPitch = ({
         </svg>
       </div>
 
-      {/* Team labels */}
-      <div className="absolute top-1 left-1/2 -translate-x-1/2 z-10">
-        <span className="text-[10px] font-medium text-white/80 bg-black/30 px-2 py-0.5 rounded">
+      {/* Team labels - outside the pitch */}
+      <div className="absolute -top-6 left-1/2 -translate-x-1/2 z-10">
+        <span className="text-xs font-semibold text-foreground bg-card px-3 py-1 rounded-lg shadow-sm border border-border">
           {awayTeamName}
         </span>
       </div>
-      <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-10">
-        <span className="text-[10px] font-medium text-white/80 bg-black/30 px-2 py-0.5 rounded">
+      <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 z-10">
+        <span className="text-xs font-semibold text-foreground bg-card px-3 py-1 rounded-lg shadow-sm border border-border">
           {homeTeamName}
         </span>
       </div>
