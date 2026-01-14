@@ -77,46 +77,23 @@ const Index = () => {
       matchDate: data.matchDate,
     };
 
+    const goals = [
+      ...data.homeGoals.map((playerId) => ({
+        playerId,
+        teamId: data.homeTeamId,
+      })),
+      ...data.awayGoals.map((playerId) => ({
+        playerId,
+        teamId: data.awayTeamId,
+      })),
+    ];
+
     if (editMatch) {
       await updateMatch.mutateAsync({ id: editMatch.id, data: matchData });
-      // Save goals for edit
-      const goals = [
-        ...data.homeGoals.map((playerId) => ({
-          playerId,
-          teamId: data.homeTeamId,
-        })),
-        ...data.awayGoals.map((playerId) => ({
-          playerId,
-          teamId: data.awayTeamId,
-        })),
-      ];
       await saveGoals.mutateAsync({ matchId: editMatch.id, goals });
     } else {
-      // For new matches, we need to create the match first, then save goals
-      // Using a workaround: we'll create match with returned id
-      const { data: newMatch, error } = await import("@/integrations/supabase/client")
-        .then(m => m.supabase)
-        .then(supabase => 
-          supabase.from("matches").insert({
-            home_team_id: data.homeTeamId,
-            away_team_id: data.awayTeamId,
-            home_score: data.homeScore,
-            away_score: data.awayScore,
-            match_date: data.matchDate,
-          }).select().single()
-        );
-      
-      if (!error && newMatch) {
-        const goals = [
-          ...data.homeGoals.map((playerId) => ({
-            playerId,
-            teamId: data.homeTeamId,
-          })),
-          ...data.awayGoals.map((playerId) => ({
-            playerId,
-            teamId: data.awayTeamId,
-          })),
-        ];
+      const newMatch = await createMatch.mutateAsync(matchData);
+      if (newMatch && goals.length > 0) {
         await saveGoals.mutateAsync({ matchId: newMatch.id, goals });
       }
     }
