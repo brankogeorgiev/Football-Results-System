@@ -62,14 +62,15 @@ export const useCreateMatch = () => {
       awayScore: number;
       matchDate: string;
     }) => {
-      const { error } = await supabase.from("matches").insert({
+      const { data: newMatch, error } = await supabase.from("matches").insert({
         home_team_id: data.homeTeamId,
         away_team_id: data.awayTeamId,
         home_score: data.homeScore,
         away_score: data.awayScore,
         match_date: data.matchDate,
-      });
+      }).select().single();
       if (error) throw error;
+      return newMatch;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["matches"] });
