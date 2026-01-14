@@ -1,4 +1,4 @@
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Eye } from "lucide-react";
 import { format } from "date-fns";
 
 interface ResultCardProps {
@@ -10,6 +10,7 @@ interface ResultCardProps {
   matchDate: string;
   onEdit: (id: string) => void;
   onDelete: (id: string) => void;
+  onView?: (id: string) => void;
   showActions?: boolean;
 }
 
@@ -22,10 +23,14 @@ const ResultCard = ({
   matchDate,
   onEdit,
   onDelete,
+  onView,
   showActions = true,
 }: ResultCardProps) => {
   return (
-    <div className="result-card animate-fade-in">
+    <div 
+      className="result-card animate-fade-in cursor-pointer hover:border-primary/50 transition-colors"
+      onClick={() => onView?.(id)}
+    >
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3 flex-1">
           <span className="team-name min-w-[60px]">{homeTeam}</span>
@@ -38,7 +43,14 @@ const ResultCard = ({
         </div>
         
         {showActions && (
-          <div className="flex items-center gap-1 ml-4">
+          <div className="flex items-center gap-1 ml-4" onClick={(e) => e.stopPropagation()}>
+            <button
+              onClick={() => onView?.(id)}
+              className="icon-button"
+              aria-label="View match"
+            >
+              <Eye className="w-4 h-4" />
+            </button>
             <button
               onClick={() => onEdit(id)}
               className="icon-button-edit"
