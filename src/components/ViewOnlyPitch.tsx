@@ -19,32 +19,33 @@ interface ViewOnlyPitchProps {
 }
 
 // 6-a-side formation (1 GK + 2 DEF + 2 MID + 1 FWD) for each team
+// Positions spread further apart to prevent overlapping
 const HOME_POSITIONS = [
-  { x: 50, y: 90, label: "GK" },
-  { x: 20, y: 80, label: "DEF" },
-  { x: 80, y: 80, label: "DEF" },
-  { x: 20, y: 68, label: "MID" },
-  { x: 80, y: 68, label: "MID" },
-  { x: 50, y: 56, label: "FWD" },
+  { x: 50, y: 88, label: "GK" },
+  { x: 25, y: 76, label: "DEF" },
+  { x: 75, y: 76, label: "DEF" },
+  { x: 25, y: 64, label: "MID" },
+  { x: 75, y: 64, label: "MID" },
+  { x: 50, y: 54, label: "FWD" },
 ];
 
 const AWAY_POSITIONS = [
-  { x: 50, y: 10, label: "GK" },
-  { x: 20, y: 20, label: "DEF" },
-  { x: 80, y: 20, label: "DEF" },
-  { x: 20, y: 32, label: "MID" },
-  { x: 80, y: 32, label: "MID" },
-  { x: 50, y: 44, label: "FWD" },
+  { x: 50, y: 12, label: "GK" },
+  { x: 25, y: 24, label: "DEF" },
+  { x: 75, y: 24, label: "DEF" },
+  { x: 25, y: 36, label: "MID" },
+  { x: 75, y: 36, label: "MID" },
+  { x: 50, y: 46, label: "FWD" },
 ];
 
 const HOME_SUBS = [
-  { x: 8, y: 75, label: "SUB" },
-  { x: 8, y: 85, label: "SUB" },
+  { x: 8, y: 70, label: "SUB" },
+  { x: 8, y: 82, label: "SUB" },
 ];
 
 const AWAY_SUBS = [
-  { x: 92, y: 15, label: "SUB" },
-  { x: 92, y: 25, label: "SUB" },
+  { x: 92, y: 18, label: "SUB" },
+  { x: 92, y: 30, label: "SUB" },
 ];
 
 const ViewOnlyPitch = ({

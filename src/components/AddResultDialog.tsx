@@ -80,6 +80,7 @@ interface AddResultDialogProps {
     awayGoals: string[];
     homePitchPlayers: PitchPlayer[];
     awayPitchPlayers: PitchPlayer[];
+    tempPlayersToCreate: { tempId: string; name: string }[];
   }) => void;
   editMatch?: Match | null;
   existingGoals?: Goal[];
@@ -171,28 +172,46 @@ const AddResultDialog = ({
     }
   }, [open, editMatch, teams, existingGoals, existingMatchPlayers]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!homeTeamId || !awayTeamId) return;
     
-    // Filter out temporary players from goals (they can't be saved to DB)
-    const validHomeGoals = homeGoals.filter(id => {
-      const player = allPlayers.find(p => p.id === id);
-      return player && !player.isTemporary;
-    });
-    const validAwayGoals = awayGoals.filter(id => {
-      const player = allPlayers.find(p => p.id === id);
-      return player && !player.isTemporary;
-    });
-
-    // Filter out temporary players from pitch players
-    const validHomePitchPlayers = homePitchPlayers.filter(pp => {
+    // Collect all temporary players used in pitch or goals
+    const usedTempPlayers = new Map<string, Player>();
+    
+    [...homePitchPlayers, ...awayPitchPlayers].forEach(pp => {
       const player = allPlayers.find(p => p.id === pp.id);
-      return player && !player.isTemporary;
+      if (player?.isTemporary) {
+        usedTempPlayers.set(pp.id, player);
+      }
     });
-    const validAwayPitchPlayers = awayPitchPlayers.filter(pp => {
-      const player = allPlayers.find(p => p.id === pp.id);
-      return player && !player.isTemporary;
+    
+    [...homeGoals, ...awayGoals].forEach(playerId => {
+      const player = allPlayers.find(p => p.id === playerId);
+      if (player?.isTemporary) {
+        usedTempPlayers.set(playerId, player);
+      }
     });
+    
+    // Create a mapping from temp ID to real ID (will be populated by parent)
+    const tempIdToRealId = new Map<string, string>();
+    
+    // For now, we'll pass temp players info to parent via a different approach
+    // We need to save temp players first - so we pass them along
+    const tempPlayersToCreate = Array.from(usedTempPlayers.values()).map(p => ({
+      tempId: p.id,
+      name: p.name,
+    }));
+    
+    // Map players, keeping temp IDs (parent will handle creation)
+    const finalHomePitchPlayers = homePitchPlayers.map(pp => ({
+      ...pp,
+      tempId: allPlayers.find(p => p.id === pp.id)?.isTemporary ? pp.id : undefined,
+    }));
+    
+    const finalAwayPitchPlayers = awayPitchPlayers.map(pp => ({
+      ...pp,
+      tempId: allPlayers.find(p => p.id === pp.id)?.isTemporary ? pp.id : undefined,
+    }));
     
     onSave({
       homeTeamId,
@@ -200,10 +219,11 @@ const AddResultDialog = ({
       homeScore,
       awayScore,
       matchDate: format(matchDate, "yyyy-MM-dd"),
-      homeGoals: validHomeGoals,
-      awayGoals: validAwayGoals,
-      homePitchPlayers: validHomePitchPlayers,
-      awayPitchPlayers: validAwayPitchPlayers,
+      homeGoals,
+      awayGoals,
+      homePitchPlayers,
+      awayPitchPlayers,
+      tempPlayersToCreate,
     });
     onOpenChange(false);
   };
