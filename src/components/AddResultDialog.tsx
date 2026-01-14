@@ -59,6 +59,12 @@ interface Match {
   match_date: string;
 }
 
+interface MatchPlayerData {
+  id: string;
+  player_id: string;
+  team_id: string;
+}
+
 interface AddResultDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -72,9 +78,12 @@ interface AddResultDialogProps {
     matchDate: string;
     homeGoals: string[];
     awayGoals: string[];
+    homePitchPlayers: PitchPlayer[];
+    awayPitchPlayers: PitchPlayer[];
   }) => void;
   editMatch?: Match | null;
   existingGoals?: Goal[];
+  existingMatchPlayers?: MatchPlayerData[];
 }
 
 const AddResultDialog = ({
@@ -85,6 +94,7 @@ const AddResultDialog = ({
   onSave,
   editMatch,
   existingGoals = [],
+  existingMatchPlayers = [],
 }: AddResultDialogProps) => {
   const [homeTeamId, setHomeTeamId] = useState<string>("");
   const [awayTeamId, setAwayTeamId] = useState<string>("");
@@ -137,8 +147,17 @@ const AddResultDialog = ({
 
       setHomeGoals(homeGoalsList);
       setAwayGoals(awayGoalsList);
-      setHomePitchPlayers([]);
-      setAwayPitchPlayers([]);
+
+      // Load existing match players
+      const homePlayers = existingMatchPlayers
+        .filter((mp) => mp.team_id === editMatch.home_team_id)
+        .map((mp, index) => ({ id: mp.player_id, positionIndex: index }));
+      const awayPlayers = existingMatchPlayers
+        .filter((mp) => mp.team_id === editMatch.away_team_id)
+        .map((mp, index) => ({ id: mp.player_id, positionIndex: index }));
+
+      setHomePitchPlayers(homePlayers);
+      setAwayPitchPlayers(awayPlayers);
     } else {
       setHomeTeamId(teams[0]?.id || "");
       setAwayTeamId(teams[1]?.id || "");
@@ -150,7 +169,7 @@ const AddResultDialog = ({
       setHomePitchPlayers([]);
       setAwayPitchPlayers([]);
     }
-  }, [open, editMatch, teams, existingGoals]);
+  }, [open, editMatch, teams, existingGoals, existingMatchPlayers]);
 
   const handleSave = () => {
     if (!homeTeamId || !awayTeamId) return;
@@ -164,6 +183,16 @@ const AddResultDialog = ({
       const player = allPlayers.find(p => p.id === id);
       return player && !player.isTemporary;
     });
+
+    // Filter out temporary players from pitch players
+    const validHomePitchPlayers = homePitchPlayers.filter(pp => {
+      const player = allPlayers.find(p => p.id === pp.id);
+      return player && !player.isTemporary;
+    });
+    const validAwayPitchPlayers = awayPitchPlayers.filter(pp => {
+      const player = allPlayers.find(p => p.id === pp.id);
+      return player && !player.isTemporary;
+    });
     
     onSave({
       homeTeamId,
@@ -173,6 +202,8 @@ const AddResultDialog = ({
       matchDate: format(matchDate, "yyyy-MM-dd"),
       homeGoals: validHomeGoals,
       awayGoals: validAwayGoals,
+      homePitchPlayers: validHomePitchPlayers,
+      awayPitchPlayers: validAwayPitchPlayers,
     });
     onOpenChange(false);
   };

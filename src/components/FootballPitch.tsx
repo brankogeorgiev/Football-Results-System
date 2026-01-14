@@ -32,11 +32,11 @@ interface FootballPitchProps {
 // 6-a-side formation (1 GK + 2 DEF + 2 MID + 1 FWD) for each team
 // Positions are defined as percentages of the pitch - spread further apart
 const HOME_POSITIONS = [
-  // Goalkeeper
-  { x: 50, y: 95, label: "GK" },
+  // Goalkeeper - moved slightly toward center for visibility
+  { x: 50, y: 90, label: "GK" },
   // Defenders (spread wider)
-  { x: 20, y: 82, label: "DEF" },
-  { x: 80, y: 82, label: "DEF" },
+  { x: 20, y: 80, label: "DEF" },
+  { x: 80, y: 80, label: "DEF" },
   // Midfielders (spread wider)
   { x: 20, y: 68, label: "MID" },
   { x: 80, y: 68, label: "MID" },
@@ -45,11 +45,11 @@ const HOME_POSITIONS = [
 ];
 
 const AWAY_POSITIONS = [
-  // Goalkeeper
-  { x: 50, y: 5, label: "GK" },
+  // Goalkeeper - moved slightly toward center for visibility
+  { x: 50, y: 10, label: "GK" },
   // Defenders (spread wider)
-  { x: 20, y: 18, label: "DEF" },
-  { x: 80, y: 18, label: "DEF" },
+  { x: 20, y: 20, label: "DEF" },
+  { x: 80, y: 20, label: "DEF" },
   // Midfielders (spread wider)
   { x: 20, y: 32, label: "MID" },
   { x: 80, y: 32, label: "MID" },

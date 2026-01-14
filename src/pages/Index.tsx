@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
@@ -18,8 +19,10 @@ import {
 } from "@/hooks/useMatches";
 import { usePlayers } from "@/hooks/usePlayers";
 import { useMatchGoals, useSaveMatchGoals } from "@/hooks/useGoals";
+import { useMatchPlayers, useSaveMatchPlayers } from "@/hooks/useMatchPlayers";
 
 const Index = () => {
+  const navigate = useNavigate();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editMatch, setEditMatch] = useState<Match | null>(null);
@@ -30,10 +33,12 @@ const Index = () => {
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: players, isLoading: playersLoading } = usePlayers();
   const { data: existingGoals } = useMatchGoals(editMatch?.id || null);
+  const { data: existingMatchPlayers } = useMatchPlayers(editMatch?.id || null);
   const createMatch = useCreateMatch();
   const updateMatch = useUpdateMatch();
   const deleteMatch = useDeleteMatch();
   const saveGoals = useSaveMatchGoals();
+  const saveMatchPlayers = useSaveMatchPlayers();
 
   const handleAddResult = () => {
     setEditMatch(null);
@@ -46,6 +51,10 @@ const Index = () => {
       setEditMatch(match);
       setDialogOpen(true);
     }
+  };
+
+  const handleView = (id: string) => {
+    navigate(`/match/${id}`);
   };
 
   const handleDelete = (id: string) => {
@@ -68,6 +77,8 @@ const Index = () => {
     matchDate: string;
     homeGoals: string[];
     awayGoals: string[];
+    homePitchPlayers: { id: string; positionIndex: number }[];
+    awayPitchPlayers: { id: string; positionIndex: number }[];
   }) => {
     const matchData = {
       homeTeamId: data.homeTeamId,
@@ -88,13 +99,32 @@ const Index = () => {
       })),
     ];
 
+    const matchPlayers = [
+      ...data.homePitchPlayers.map((pp) => ({
+        playerId: pp.id,
+        teamId: data.homeTeamId,
+        positionIndex: pp.positionIndex,
+      })),
+      ...data.awayPitchPlayers.map((pp) => ({
+        playerId: pp.id,
+        teamId: data.awayTeamId,
+        positionIndex: pp.positionIndex,
+      })),
+    ];
+
     if (editMatch) {
       await updateMatch.mutateAsync({ id: editMatch.id, data: matchData });
       await saveGoals.mutateAsync({ matchId: editMatch.id, goals });
+      await saveMatchPlayers.mutateAsync({ matchId: editMatch.id, players: matchPlayers });
     } else {
       const newMatch = await createMatch.mutateAsync(matchData);
-      if (newMatch && goals.length > 0) {
-        await saveGoals.mutateAsync({ matchId: newMatch.id, goals });
+      if (newMatch) {
+        if (goals.length > 0) {
+          await saveGoals.mutateAsync({ matchId: newMatch.id, goals });
+        }
+        if (matchPlayers.length > 0) {
+          await saveMatchPlayers.mutateAsync({ matchId: newMatch.id, players: matchPlayers });
+        }
       }
     }
   };
@@ -155,6 +185,7 @@ const Index = () => {
                 matchDate={match.match_date}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
+                onView={handleView}
                 showActions={!!user}
               />
             ))
@@ -186,6 +217,7 @@ const Index = () => {
           onSave={handleSave}
           editMatch={editMatch}
           existingGoals={existingGoals}
+          existingMatchPlayers={existingMatchPlayers}
         />
       )}
 
