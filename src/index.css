@@ -38,9 +38,17 @@
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    /* Team colors */
-    --team-home: 260 60% 55%;
+    /* Team colors - Field players */
+    --team-home: 270 100% 98%;
+    --team-home-border: 260 60% 55%;
     --team-away: 220 15% 25%;
+    --team-away-border: 0 0% 100%;
+    
+    /* Goalkeeper colors */
+    --team-home-gk: 260 60% 55%;
+    --team-home-gk-border: 0 0% 100%;
+    --team-away-gk: 180 60% 30%;
+    --team-away-gk-border: 0 0% 100%;
 
     /* Success */
     --success: 142 71% 45%;
@@ -83,8 +91,14 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --team-home: 260 60% 55%;
-    --team-away: 220 15% 70%;
+    --team-home: 270 100% 98%;
+    --team-home-border: 260 60% 55%;
+    --team-away: 220 15% 25%;
+    --team-away-border: 0 0% 100%;
+    --team-home-gk: 260 60% 55%;
+    --team-home-gk-border: 0 0% 100%;
+    --team-away-gk: 180 60% 30%;
+    --team-away-gk-border: 0 0% 100%;
     --success: 142 71% 45%;
     --success-foreground: 0 0% 100%;
     --warning: 45 93% 55%;
@@ -149,9 +163,21 @@
 
   .bg-team-home {
     background-color: hsl(var(--team-home));
+    border-color: hsl(var(--team-home-border));
   }
 
   .bg-team-away {
     background-color: hsl(var(--team-away));
+    border-color: hsl(var(--team-away-border));
+  }
+
+  .bg-team-home-gk {
+    background-color: hsl(var(--team-home-gk));
+    border-color: hsl(var(--team-home-gk-border));
+  }
+
+  .bg-team-away-gk {
+    background-color: hsl(var(--team-away-gk));
+    border-color: hsl(var(--team-away-gk-border));
   }
 }
