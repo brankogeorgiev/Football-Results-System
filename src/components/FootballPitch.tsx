@@ -30,31 +30,42 @@ interface FootballPitchProps {
 }
 
 // 6-a-side formation (1 GK + 2 DEF + 2 MID + 1 FWD) for each team
-// Positions are defined as percentages of the pitch
+// Positions are defined as percentages of the pitch - spread further apart
 const HOME_POSITIONS = [
   // Goalkeeper
-  { x: 50, y: 92, label: "GK" },
+  { x: 50, y: 95, label: "GK" },
   // Defenders (spread wider)
-  { x: 25, y: 78, label: "DEF" },
-  { x: 75, y: 78, label: "DEF" },
+  { x: 20, y: 82, label: "DEF" },
+  { x: 80, y: 82, label: "DEF" },
   // Midfielders (spread wider)
-  { x: 25, y: 62, label: "MID" },
-  { x: 75, y: 62, label: "MID" },
-  // Forward
-  { x: 50, y: 52, label: "FWD" },
+  { x: 20, y: 68, label: "MID" },
+  { x: 80, y: 68, label: "MID" },
+  // Forward - moved down to avoid overlap
+  { x: 50, y: 56, label: "FWD" },
 ];
 
 const AWAY_POSITIONS = [
   // Goalkeeper
-  { x: 50, y: 8, label: "GK" },
+  { x: 50, y: 5, label: "GK" },
   // Defenders (spread wider)
-  { x: 25, y: 22, label: "DEF" },
-  { x: 75, y: 22, label: "DEF" },
+  { x: 20, y: 18, label: "DEF" },
+  { x: 80, y: 18, label: "DEF" },
   // Midfielders (spread wider)
-  { x: 25, y: 38, label: "MID" },
-  { x: 75, y: 38, label: "MID" },
-  // Forward
-  { x: 50, y: 48, label: "FWD" },
+  { x: 20, y: 32, label: "MID" },
+  { x: 80, y: 32, label: "MID" },
+  // Forward - moved up to avoid overlap
+  { x: 50, y: 44, label: "FWD" },
+];
+
+// Substitute positions on the sides
+const HOME_SUBS = [
+  { x: 8, y: 75, label: "SUB" },
+  { x: 8, y: 85, label: "SUB" },
+];
+
+const AWAY_SUBS = [
+  { x: 92, y: 15, label: "SUB" },
+  { x: 92, y: 25, label: "SUB" },
 ];
 
 const FootballPitch = ({
@@ -256,6 +267,12 @@ const FootballPitch = ({
         
         {/* Away team positions (top half) */}
         {AWAY_POSITIONS.map((pos, index) => renderPosition("away", pos, index))}
+        
+        {/* Home substitutes (left side) */}
+        {HOME_SUBS.map((pos, index) => renderPosition("home", pos, index + 6))}
+        
+        {/* Away substitutes (right side) */}
+        {AWAY_SUBS.map((pos, index) => renderPosition("away", pos, index + 6))}
       </div>
     </div>
   );
