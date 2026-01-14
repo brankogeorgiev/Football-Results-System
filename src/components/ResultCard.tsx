@@ -1,4 +1,4 @@
-import { Pencil, Trash2, Eye } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 
 interface ResultCardProps {
@@ -44,13 +44,6 @@ const ResultCard = ({
         
         {showActions && (
           <div className="flex items-center gap-1 ml-4" onClick={(e) => e.stopPropagation()}>
-            <button
-              onClick={() => onView?.(id)}
-              className="icon-button"
-              aria-label="View match"
-            >
-              <Eye className="w-4 h-4" />
-            </button>
             <button
               onClick={() => onEdit(id)}
               className="icon-button-edit"
