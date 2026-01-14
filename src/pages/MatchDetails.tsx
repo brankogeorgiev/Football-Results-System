@@ -1,5 +1,5 @@
 import { useParams, useNavigate } from "react-router-dom";
-import { ArrowLeft, User, Calendar, Pencil } from "lucide-react";
+import { ArrowLeft, User, Calendar } from "lucide-react";
 import { format } from "date-fns";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
@@ -9,13 +9,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayers } from "@/hooks/usePlayers";
-import { useAuth } from "@/hooks/useAuth";
 import ViewOnlyPitch from "@/components/ViewOnlyPitch";
 
 const MatchDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { data: allPlayers } = usePlayers();
 
   // Fetch match details
@@ -127,17 +125,11 @@ const MatchDetails = () => {
 
       <main className="container max-w-lg mx-auto px-4 py-6">
         {/* Back button */}
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
             <ArrowLeft className="w-4 h-4" />
             Back
           </Button>
-          {user && (
-            <Button variant="outline" size="sm" onClick={() => navigate(`/?edit=${id}`)}>
-              <Pencil className="w-4 h-4 mr-2" />
-              Edit
-            </Button>
-          )}
         </div>
 
         {/* Match score card */}
@@ -150,11 +142,23 @@ const MatchDetails = () => {
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                <span className="score-badge text-2xl bg-primary text-primary-foreground px-4 py-2">
+                <span className={`score-badge text-2xl px-4 py-2 rounded-lg font-bold ${
+                  match.home_score > match.away_score 
+                    ? 'bg-green-500 text-white' 
+                    : match.home_score < match.away_score 
+                      ? 'bg-red-500 text-white' 
+                      : 'bg-yellow-500 text-white'
+                }`}>
                   {match.home_score}
                 </span>
                 <span className="text-muted-foreground font-bold text-xl">:</span>
-                <span className="score-badge text-2xl bg-primary text-primary-foreground px-4 py-2">
+                <span className={`score-badge text-2xl px-4 py-2 rounded-lg font-bold ${
+                  match.away_score > match.home_score 
+                    ? 'bg-green-500 text-white' 
+                    : match.away_score < match.home_score 
+                      ? 'bg-red-500 text-white' 
+                      : 'bg-yellow-500 text-white'
+                }`}>
                   {match.away_score}
                 </span>
               </div>
