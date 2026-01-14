@@ -171,6 +171,24 @@ const MatchDetails = () => {
           </CardContent>
         </Card>
 
+        {/* Football pitch with players - shown above goal scorers */}
+        {(homePlayers.length > 0 || awayPlayers.length > 0) && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="text-base">Lineup</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <ViewOnlyPitch
+                homeTeamName={match.home_team?.name || "Home"}
+                awayTeamName={match.away_team?.name || "Away"}
+                homePlayers={homePlayers}
+                awayPlayers={awayPlayers}
+                allPlayers={allPlayers || []}
+              />
+            </CardContent>
+          </Card>
+        )}
+
         {/* Goal scorers */}
         {(homeGoals.length > 0 || awayGoals.length > 0) && (
           <Card className="mb-6">
@@ -223,24 +241,6 @@ const MatchDetails = () => {
                   )}
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Football pitch with players */}
-        {(homePlayers.length > 0 || awayPlayers.length > 0) && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Lineup</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <ViewOnlyPitch
-                homeTeamName={match.home_team?.name || "Home"}
-                awayTeamName={match.away_team?.name || "Away"}
-                homePlayers={homePlayers}
-                awayPlayers={awayPlayers}
-                allPlayers={allPlayers || []}
-              />
             </CardContent>
           </Card>
         )}

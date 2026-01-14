@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,6 +10,7 @@ import AddResultDialog from "@/components/AddResultDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { supabase } from "@/integrations/supabase/client";
 import {
   useMatches,
   useTeams,
@@ -23,6 +25,7 @@ import { useMatchPlayers, useSaveMatchPlayers } from "@/hooks/useMatchPlayers";
 
 const Index = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editMatch, setEditMatch] = useState<Match | null>(null);
@@ -79,7 +82,26 @@ const Index = () => {
     awayGoals: string[];
     homePitchPlayers: { id: string; positionIndex: number }[];
     awayPitchPlayers: { id: string; positionIndex: number }[];
+    tempPlayersToCreate: { tempId: string; name: string }[];
   }) => {
+    // First, create any temporary players and get their real IDs
+    const tempIdToRealId = new Map<string, string>();
+    
+    for (const tempPlayer of data.tempPlayersToCreate) {
+      const { data: newPlayer, error } = await supabase
+        .from("players")
+        .insert({ name: tempPlayer.name })
+        .select("id")
+        .single();
+      
+      if (!error && newPlayer) {
+        tempIdToRealId.set(tempPlayer.tempId, newPlayer.id);
+      }
+    }
+    
+    // Helper to resolve player ID (temp or real)
+    const resolvePlayerId = (id: string) => tempIdToRealId.get(id) || id;
+    
     const matchData = {
       homeTeamId: data.homeTeamId,
       awayTeamId: data.awayTeamId,
@@ -90,23 +112,23 @@ const Index = () => {
 
     const goals = [
       ...data.homeGoals.map((playerId) => ({
-        playerId,
+        playerId: resolvePlayerId(playerId),
         teamId: data.homeTeamId,
       })),
       ...data.awayGoals.map((playerId) => ({
-        playerId,
+        playerId: resolvePlayerId(playerId),
         teamId: data.awayTeamId,
       })),
     ];
 
     const matchPlayers = [
       ...data.homePitchPlayers.map((pp) => ({
-        playerId: pp.id,
+        playerId: resolvePlayerId(pp.id),
         teamId: data.homeTeamId,
         positionIndex: pp.positionIndex,
       })),
       ...data.awayPitchPlayers.map((pp) => ({
-        playerId: pp.id,
+        playerId: resolvePlayerId(pp.id),
         teamId: data.awayTeamId,
         positionIndex: pp.positionIndex,
       })),
@@ -126,6 +148,11 @@ const Index = () => {
           await saveMatchPlayers.mutateAsync({ matchId: newMatch.id, players: matchPlayers });
         }
       }
+    }
+    
+    // Invalidate players query to show newly created players
+    if (data.tempPlayersToCreate.length > 0) {
+      queryClient.invalidateQueries({ queryKey: ["players"] });
     }
   };
 
