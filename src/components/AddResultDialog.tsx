@@ -333,6 +333,18 @@ const AddResultDialog = ({
     return player?.name?.split(" ")[0] || "Player";
   };
 
+  // Check if a goal is an own goal (player from opposite team)
+  const isOwnGoal = (playerId: string, scoringForTeam: "home" | "away") => {
+    const player = allPlayers.find((p) => p.id === playerId);
+    if (!player || !player.default_team_id) return false;
+    
+    const teamId = scoringForTeam === "home" ? homeTeamId : awayTeamId;
+    const opposingTeamId = scoringForTeam === "home" ? awayTeamId : homeTeamId;
+    
+    // If player's default team is the opposing team, it's an own goal
+    return player.default_team_id === opposingTeamId;
+  };
+
   const homeTeam = teams.find((t) => t.id === homeTeamId);
   const awayTeam = teams.find((t) => t.id === awayTeamId);
 
@@ -448,23 +460,40 @@ const AddResultDialog = ({
                     <div className="text-xs text-muted-foreground text-center mb-2">
                       {homeTeam?.name || "Home"}
                     </div>
-                    {homeGoals.map((playerId, index) => (
-                      <div
-                        key={`home-${playerId}-${index}`}
-                        className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-team-home flex items-center justify-center">
-                          <User className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-sm flex-1 truncate">{getPlayerName(playerId)}</span>
-                        <button
-                          onClick={() => removeGoal("home", index)}
-                          className="text-muted-foreground hover:text-destructive"
+                    {homeGoals.map((playerId, index) => {
+                      const ownGoal = isOwnGoal(playerId, "home");
+                      return (
+                        <div
+                          key={`home-${playerId}-${index}`}
+                          className={cn(
+                            "flex items-center gap-2 rounded-full px-3 py-1.5",
+                            ownGoal 
+                              ? "bg-destructive/20 border-2 border-destructive/50" 
+                              : "bg-muted"
+                          )}
                         >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                          <div className={cn(
+                            "w-6 h-6 rounded-full flex items-center justify-center",
+                            ownGoal ? "bg-destructive" : "bg-team-home"
+                          )}>
+                            <User className="w-3 h-3 text-white" />
+                          </div>
+                          <span className={cn(
+                            "text-sm flex-1 truncate",
+                            ownGoal && "text-destructive font-medium"
+                          )}>
+                            {getPlayerName(playerId)}
+                            {ownGoal && <span className="ml-1 text-xs">(OG)</span>}
+                          </span>
+                          <button
+                            onClick={() => removeGoal("home", index)}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
                     <Button
                       variant="outline"
                       size="sm"
@@ -481,23 +510,40 @@ const AddResultDialog = ({
                     <div className="text-xs text-muted-foreground text-center mb-2">
                       {awayTeam?.name || "Away"}
                     </div>
-                    {awayGoals.map((playerId, index) => (
-                      <div
-                        key={`away-${playerId}-${index}`}
-                        className="flex items-center gap-2 bg-muted rounded-full px-3 py-1.5"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-team-away flex items-center justify-center">
-                          <User className="w-3 h-3 text-white" />
-                        </div>
-                        <span className="text-sm flex-1 truncate">{getPlayerName(playerId)}</span>
-                        <button
-                          onClick={() => removeGoal("away", index)}
-                          className="text-muted-foreground hover:text-destructive"
+                    {awayGoals.map((playerId, index) => {
+                      const ownGoal = isOwnGoal(playerId, "away");
+                      return (
+                        <div
+                          key={`away-${playerId}-${index}`}
+                          className={cn(
+                            "flex items-center gap-2 rounded-full px-3 py-1.5",
+                            ownGoal 
+                              ? "bg-destructive/20 border-2 border-destructive/50" 
+                              : "bg-muted"
+                          )}
                         >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                          <div className={cn(
+                            "w-6 h-6 rounded-full flex items-center justify-center",
+                            ownGoal ? "bg-destructive" : "bg-team-away"
+                          )}>
+                            <User className="w-3 h-3 text-white" />
+                          </div>
+                          <span className={cn(
+                            "text-sm flex-1 truncate",
+                            ownGoal && "text-destructive font-medium"
+                          )}>
+                            {getPlayerName(playerId)}
+                            {ownGoal && <span className="ml-1 text-xs">(OG)</span>}
+                          </span>
+                          <button
+                            onClick={() => removeGoal("away", index)}
+                            className="text-muted-foreground hover:text-destructive"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+                      );
+                    })}
                     <Button
                       variant="outline"
                       size="sm"
