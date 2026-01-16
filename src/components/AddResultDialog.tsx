@@ -85,6 +85,7 @@ interface AddResultDialogProps {
   editMatch?: Match | null;
   existingGoals?: Goal[];
   existingMatchPlayers?: MatchPlayerData[];
+  isLoadingEditData?: boolean;
 }
 
 const AddResultDialog = ({
@@ -96,6 +97,7 @@ const AddResultDialog = ({
   editMatch,
   existingGoals = [],
   existingMatchPlayers = [],
+  isLoadingEditData = false,
 }: AddResultDialogProps) => {
   const [homeTeamId, setHomeTeamId] = useState<string>("");
   const [awayTeamId, setAwayTeamId] = useState<string>("");
@@ -123,9 +125,14 @@ const AddResultDialog = ({
 
   useEffect(() => {
     // Prevent resetting user edits while the dialog is open.
-    // We only initialize once per open.
+    // We only initialize once per open, and wait for edit data to load.
     if (!open) {
       initializedForOpenRef.current = false;
+      return;
+    }
+
+    // If editing, wait until the data is loaded before initializing
+    if (editMatch && isLoadingEditData) {
       return;
     }
 
@@ -170,7 +177,7 @@ const AddResultDialog = ({
       setHomePitchPlayers([]);
       setAwayPitchPlayers([]);
     }
-  }, [open, editMatch, teams, existingGoals, existingMatchPlayers]);
+  }, [open, editMatch, teams, existingGoals, existingMatchPlayers, isLoadingEditData]);
 
   const handleSave = async () => {
     if (!homeTeamId || !awayTeamId) return;

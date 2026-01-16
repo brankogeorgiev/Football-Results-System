@@ -35,8 +35,8 @@ const Index = () => {
   const { data: matches, isLoading: matchesLoading } = useMatches();
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: players, isLoading: playersLoading } = usePlayers();
-  const { data: existingGoals } = useMatchGoals(editMatch?.id || null);
-  const { data: existingMatchPlayers } = useMatchPlayers(editMatch?.id || null);
+  const { data: existingGoals, isLoading: goalsLoading } = useMatchGoals(editMatch?.id || null);
+  const { data: existingMatchPlayers, isLoading: matchPlayersLoading } = useMatchPlayers(editMatch?.id || null);
   const createMatch = useCreateMatch();
   const updateMatch = useUpdateMatch();
   const deleteMatch = useDeleteMatch();
@@ -245,6 +245,7 @@ const Index = () => {
           editMatch={editMatch}
           existingGoals={existingGoals}
           existingMatchPlayers={existingMatchPlayers}
+          isLoadingEditData={editMatch ? (goalsLoading || matchPlayersLoading) : false}
         />
       )}
 
