@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Plus, Minus, X, User, CalendarIcon } from "lucide-react";
+import { Plus, Minus, X, User, CalendarIcon, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -366,6 +366,12 @@ const AddResultDialog = ({
           </DialogHeader>
 
           <ScrollArea className="max-h-[calc(95vh-80px)]">
+            {editMatch && isLoadingEditData ? (
+              <div className="flex flex-col items-center justify-center py-16 gap-3">
+                <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+                <p className="text-sm text-muted-foreground">Loading match data...</p>
+              </div>
+            ) : (
             <div className="px-4 pb-4 space-y-4">
               {/* Team selectors with scores */}
               <div className="space-y-3">
@@ -598,6 +604,7 @@ const AddResultDialog = ({
                 {editMatch ? "Save Changes" : "Save result"}
               </Button>
             </div>
+            )}
           </ScrollArea>
         </DialogContent>
       </Dialog>
