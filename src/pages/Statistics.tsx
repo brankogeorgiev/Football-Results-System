@@ -30,7 +30,7 @@ interface GoalWithPlayer {
   match_id: string;
   player_id: string;
   team_id: string;
-  player?: { id: string; name: string };
+  player?: { id: string; name: string; default_team_id: string | null };
 }
 
 const useAllGoals = () => {
@@ -41,7 +41,7 @@ const useAllGoals = () => {
         .from("goals")
         .select(`
           *,
-          player:players(id, name)
+          player:players(id, name, default_team_id)
         `);
       if (error) throw error;
       return data as GoalWithPlayer[];
@@ -130,12 +130,22 @@ const Statistics = () => {
     }).sort((a, b) => b.wins - a.wins || b.goalDifference - a.goalDifference);
   }, [teams, filteredMatches]);
 
-  // Calculate top scorers
+  // Helper to check if a goal is an own goal
+  const isOwnGoal = (goal: GoalWithPlayer, matches: typeof filteredMatches) => {
+    const match = matches.find((m) => m.id === goal.match_id);
+    if (!match || !goal.player?.default_team_id) return false;
+    
+    // If the goal is credited to a team but the player's default team is the opposing team
+    const opposingTeamId = goal.team_id === match.home_team_id ? match.away_team_id : match.home_team_id;
+    return goal.player.default_team_id === opposingTeamId;
+  };
+
+  // Calculate top scorers (excluding own goals)
   const topScorers = useMemo(() => {
     if (!allGoals || !players || !filteredMatches) return [];
 
     const matchIds = new Set(filteredMatches.map((m) => m.id));
-    const filteredGoals = allGoals.filter((g) => matchIds.has(g.match_id));
+    const filteredGoals = allGoals.filter((g) => matchIds.has(g.match_id) && !isOwnGoal(g, filteredMatches));
 
     const scorerMap = new Map<string, { name: string; goals: number }>();
 
@@ -154,6 +164,31 @@ const Statistics = () => {
       .sort((a, b) => b.goals - a.goals)
       .slice(0, 10);
   }, [allGoals, players, filteredMatches]);
+
+  // Calculate own goals
+  const ownGoalScorers = useMemo(() => {
+    if (!allGoals || !filteredMatches) return [];
+
+    const matchIds = new Set(filteredMatches.map((m) => m.id));
+    const ownGoals = allGoals.filter((g) => matchIds.has(g.match_id) && isOwnGoal(g, filteredMatches));
+
+    const scorerMap = new Map<string, { name: string; goals: number }>();
+
+    ownGoals.forEach((goal) => {
+      const playerName = goal.player?.name || "Unknown";
+      const existing = scorerMap.get(goal.player_id);
+      if (existing) {
+        existing.goals++;
+      } else {
+        scorerMap.set(goal.player_id, { name: playerName, goals: 1 });
+      }
+    });
+
+    return Array.from(scorerMap.entries())
+      .map(([id, data]) => ({ id, ...data }))
+      .sort((a, b) => b.goals - a.goals)
+      .slice(0, 10);
+  }, [allGoals, filteredMatches]);
 
   // Head-to-head stats
   const headToHead = useMemo(() => {
@@ -502,6 +537,45 @@ const Statistics = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Own Goals */}
+            {ownGoalScorers.length > 0 && (
+              <Card className="border-destructive/30">
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-medium flex items-center gap-2">
+                    <Target className="w-4 h-4 text-destructive" />
+                    Own Goals
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {ownGoalScorers.map((scorer, index) => (
+                      <div
+                        key={scorer.id}
+                        className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="text-lg font-bold w-6 text-destructive">
+                            {index + 1}
+                          </span>
+                          <p className="font-medium text-foreground">
+                            {scorer.name}
+                          </p>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xl font-bold text-destructive">
+                            {scorer.goals}
+                          </span>
+                          <span className="text-xs text-muted-foreground">
+                            OG
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
           </div>
         )}
       </main>
