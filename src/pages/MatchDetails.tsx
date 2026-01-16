@@ -119,6 +119,13 @@ const MatchDetails = () => {
     return player?.name || "Unknown";
   };
 
+  // Check if a goal is an own goal (player's default team is the opposing team)
+  const isOwnGoal = (playerId: string, scoringForTeamId: string, opposingTeamId: string) => {
+    const player = allPlayers?.find((p) => p.id === playerId);
+    if (!player || !player.default_team_id) return false;
+    return player.default_team_id === opposingTeamId;
+  };
+
   return (
     <div className="min-h-screen bg-background pb-20">
       <Header />
@@ -207,17 +214,27 @@ const MatchDetails = () => {
                     {match.home_team?.name}
                   </div>
                   {homeGoals.length > 0 ? (
-                    homeGoals.map((goal, index) => (
-                      <div
-                        key={goal.id}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-team-home flex items-center justify-center">
-                          <User className="w-3 h-3 text-purple-600" />
+                    homeGoals.map((goal) => {
+                      const ownGoal = isOwnGoal(goal.player_id, match.home_team_id, match.away_team_id);
+                      return (
+                        <div
+                          key={goal.id}
+                          className={`flex items-center gap-2 text-sm rounded-full px-2 py-1 ${
+                            ownGoal ? "bg-destructive/20 border border-destructive/50" : ""
+                          }`}
+                        >
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                            ownGoal ? "bg-destructive" : "bg-team-home"
+                          }`}>
+                            <User className={`w-3 h-3 ${ownGoal ? "text-white" : "text-purple-600"}`} />
+                          </div>
+                          <span className={ownGoal ? "text-destructive font-medium" : ""}>
+                            {goal.player?.name || "Unknown"}
+                            {ownGoal && <span className="ml-1 text-xs">(OG)</span>}
+                          </span>
                         </div>
-                        <span>{goal.player?.name || "Unknown"}</span>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <span className="text-sm text-muted-foreground">No goals</span>
                   )}
@@ -229,17 +246,27 @@ const MatchDetails = () => {
                     {match.away_team?.name}
                   </div>
                   {awayGoals.length > 0 ? (
-                    awayGoals.map((goal) => (
-                      <div
-                        key={goal.id}
-                        className="flex items-center gap-2 text-sm"
-                      >
-                        <div className="w-6 h-6 rounded-full bg-team-away flex items-center justify-center">
-                          <User className="w-3 h-3 text-white" />
+                    awayGoals.map((goal) => {
+                      const ownGoal = isOwnGoal(goal.player_id, match.away_team_id, match.home_team_id);
+                      return (
+                        <div
+                          key={goal.id}
+                          className={`flex items-center gap-2 text-sm rounded-full px-2 py-1 ${
+                            ownGoal ? "bg-destructive/20 border border-destructive/50" : ""
+                          }`}
+                        >
+                          <div className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                            ownGoal ? "bg-destructive" : "bg-team-away"
+                          }`}>
+                            <User className={`w-3 h-3 text-white`} />
+                          </div>
+                          <span className={ownGoal ? "text-destructive font-medium" : ""}>
+                            {goal.player?.name || "Unknown"}
+                            {ownGoal && <span className="ml-1 text-xs">(OG)</span>}
+                          </span>
                         </div>
-                        <span>{goal.player?.name || "Unknown"}</span>
-                      </div>
-                    ))
+                      );
+                    })
                   ) : (
                     <span className="text-sm text-muted-foreground">No goals</span>
                   )}
