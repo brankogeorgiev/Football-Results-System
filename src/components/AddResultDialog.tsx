@@ -342,13 +342,22 @@ const AddResultDialog = ({
 
   // Check if a goal is an own goal (player from opposite team)
   const isOwnGoal = (playerId: string, scoringForTeam: "home" | "away") => {
+    const opposingTeamId = scoringForTeam === "home" ? awayTeamId : homeTeamId;
+    
+    // First, check if player is assigned to a team on the pitch for THIS match
+    const isOnHomePitch = homePitchPlayers.some(p => p.id === playerId);
+    const isOnAwayPitch = awayPitchPlayers.some(p => p.id === playerId);
+    
+    if (isOnHomePitch || isOnAwayPitch) {
+      // Player is on the pitch - use their match assignment
+      const playerMatchTeamId = isOnHomePitch ? homeTeamId : awayTeamId;
+      return playerMatchTeamId === opposingTeamId;
+    }
+    
+    // Fall back to default team if player is not on pitch
     const player = allPlayers.find((p) => p.id === playerId);
     if (!player || !player.default_team_id) return false;
     
-    const teamId = scoringForTeam === "home" ? homeTeamId : awayTeamId;
-    const opposingTeamId = scoringForTeam === "home" ? awayTeamId : homeTeamId;
-    
-    // If player's default team is the opposing team, it's an own goal
     return player.default_team_id === opposingTeamId;
   };
 
