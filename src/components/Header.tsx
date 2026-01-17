@@ -3,18 +3,21 @@ import { Trophy, User, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import AuthDialog from "@/components/AuthDialog";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
+import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 
 const Header = () => {
   const [authOpen, setAuthOpen] = useState(false);
   const { user, loading, signOut } = useAuth();
+  const { t } = useLanguage();
 
   const handleSignOut = async () => {
     const { error } = await signOut();
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Signed out successfully");
+      toast.success(t("signedOutSuccessfully"));
     }
   };
 
@@ -27,24 +30,27 @@ const Header = () => {
               <Trophy className="w-5 h-5 text-primary" />
             </div>
             <div>
-              <h1 className="font-display font-bold text-lg text-foreground">Football</h1>
-              <p className="text-xs text-muted-foreground uppercase tracking-wider">Results System</p>
+              <h1 className="font-display font-bold text-lg text-foreground">{t("football")}</h1>
+              <p className="text-xs text-muted-foreground uppercase tracking-wider">{t("resultsSystem")}</p>
             </div>
           </div>
 
-          {!loading && (
-            <div>
-              {user ? (
-                <Button variant="ghost" size="icon" onClick={handleSignOut} title="Sign out">
-                  <LogOut className="w-5 h-5" />
-                </Button>
-              ) : (
-                <Button variant="ghost" size="icon" onClick={() => setAuthOpen(true)} title="Sign in">
-                  <User className="w-5 h-5" />
-                </Button>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-1">
+            <LanguageSwitcher />
+            {!loading && (
+              <>
+                {user ? (
+                  <Button variant="ghost" size="icon" onClick={handleSignOut} title={t("signOut")}>
+                    <LogOut className="w-5 h-5" />
+                  </Button>
+                ) : (
+                  <Button variant="ghost" size="icon" onClick={() => setAuthOpen(true)} title={t("signIn")}>
+                    <User className="w-5 h-5" />
+                  </Button>
+                )}
+              </>
+            )}
+          </div>
         </div>
       </header>
 

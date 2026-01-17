@@ -1,15 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
 import { Trophy, Users, BarChart3 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/i18n/LanguageContext";
+import { TranslationKey } from "@/i18n/translations";
 
 const navItems = [
-  { path: "/", label: "Results", icon: Trophy },
-  { path: "/players", label: "Players", icon: Users },
-  { path: "/statistics", label: "Stats", icon: BarChart3 },
+  { path: "/", labelKey: "results" as TranslationKey, icon: Trophy },
+  { path: "/players", labelKey: "players" as TranslationKey, icon: Users },
+  { path: "/statistics", labelKey: "stats" as TranslationKey, icon: BarChart3 },
 ];
 
 const BottomNav = () => {
   const location = useLocation();
+  const { t } = useLanguage();
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border/50 z-50">
@@ -31,7 +34,7 @@ const BottomNav = () => {
                 )}
               >
                 <Icon className="w-5 h-5" />
-                <span className="text-xs font-medium">{item.label}</span>
+                <span className="text-xs font-medium">{t(item.labelKey)}</span>
               </Link>
             );
           })}

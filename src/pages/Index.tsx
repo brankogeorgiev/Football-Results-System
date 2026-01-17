@@ -11,6 +11,7 @@ import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/i18n/LanguageContext";
 import {
   useMatches,
   useTeams,
@@ -31,6 +32,7 @@ const Index = () => {
   const [editMatch, setEditMatch] = useState<Match | null>(null);
   const [deleteMatchId, setDeleteMatchId] = useState<string | null>(null);
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const { data: matches, isLoading: matchesLoading } = useMatches();
   const { data: teams, isLoading: teamsLoading } = useTeams();
@@ -166,12 +168,12 @@ const Index = () => {
         {/* Page title with add button */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display font-bold text-xl text-foreground">
-            Past Results
+            {t("pastResults")}
           </h2>
           {user && (
             <Button onClick={handleAddResult} size="sm" className="gap-1">
               <Plus className="w-4 h-4" />
-              Add result
+              {t("addResult")}
             </Button>
           )}
         </div>
@@ -219,12 +221,12 @@ const Index = () => {
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">
-                No matches recorded yet
+                {t("noMatchesRecorded")}
               </p>
               {user && (
                 <Button onClick={handleAddResult} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add your first result
+                  {t("addFirstResult")}
                 </Button>
               )}
             </div>

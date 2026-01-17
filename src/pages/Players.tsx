@@ -8,6 +8,7 @@ import PlayerDialog from "@/components/PlayerDialog";
 import DeleteConfirmDialog from "@/components/DeleteConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLanguage } from "@/i18n/LanguageContext";
 import {
   usePlayers,
   useCreatePlayer,
@@ -23,6 +24,7 @@ const Players = () => {
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
   const { user } = useAuth();
+  const { t } = useLanguage();
 
   const { data: players, isLoading: playersLoading } = usePlayers();
   const { data: teams, isLoading: teamsLoading } = useTeams();
@@ -73,12 +75,12 @@ const Players = () => {
         {/* Page title with add button */}
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display font-bold text-xl text-foreground">
-            Players
+            {t("players")}
           </h2>
           {user && (
             <Button onClick={handleAddPlayer} size="sm" className="gap-1">
               <Plus className="w-4 h-4" />
-              Add player
+              {t("addPlayer")}
             </Button>
           )}
         </div>
@@ -115,11 +117,11 @@ const Players = () => {
             ))
           ) : (
             <div className="text-center py-12">
-              <p className="text-muted-foreground mb-4">No players added yet</p>
+              <p className="text-muted-foreground mb-4">{t("noPlayersAdded")}</p>
               {user && (
                 <Button onClick={handleAddPlayer} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
-                  Add your first player
+                  {t("addFirstPlayer")}
                 </Button>
               )}
             </div>
@@ -144,8 +146,8 @@ const Players = () => {
         open={deleteDialogOpen}
         onOpenChange={setDeleteDialogOpen}
         onConfirm={handleConfirmDelete}
-        title="Delete Player"
-        description="Are you sure you want to delete this player? This will also remove them from any match records."
+        title={t("deletePlayer")}
+        description={t("deletePlayerDescription")}
       />
     </div>
   );
