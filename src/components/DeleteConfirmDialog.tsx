@@ -8,6 +8,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface DeleteConfirmDialogProps {
   open: boolean;
@@ -21,23 +22,29 @@ const DeleteConfirmDialog = ({
   open,
   onOpenChange,
   onConfirm,
-  title = "Delete Match",
-  description = "Are you sure you want to delete this match? This action cannot be undone.",
+  title,
+  description,
 }: DeleteConfirmDialogProps) => {
+  const { t } = useLanguage();
+  
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-display">{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
+          <AlertDialogTitle className="font-display">
+            {title || t("deleteMatch")}
+          </AlertDialogTitle>
+          <AlertDialogDescription>
+            {description || t("deleteMatchDescription")}
+          </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogCancel>{t("cancel")}</AlertDialogCancel>
           <AlertDialogAction
             onClick={onConfirm}
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
           >
-            Delete
+            {t("delete")}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

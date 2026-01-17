@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Team {
   id: string;
@@ -38,6 +39,7 @@ const PlayerDialog = ({
 }: PlayerDialogProps) => {
   const [name, setName] = useState("");
   const [defaultTeamId, setDefaultTeamId] = useState<string>("none");
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (editPlayer) {
@@ -66,31 +68,31 @@ const PlayerDialog = ({
       <DialogContent className="max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-display text-xl">
-            {editPlayer ? "Edit Player" : "Add Player"}
+            {editPlayer ? t("editPlayer") : t("addPlayerTitle")}
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-4">
           <div className="space-y-2">
-            <Label htmlFor="player-name">Player Name</Label>
+            <Label htmlFor="player-name">{t("playerName")}</Label>
             <Input
               id="player-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Enter player name"
+              placeholder={t("enterPlayerName")}
               autoFocus
             />
           </div>
 
           <div className="space-y-2">
-            <Label>Default Team (optional)</Label>
+            <Label>{t("defaultTeam")}</Label>
             <Select value={defaultTeamId} onValueChange={setDefaultTeamId}>
               <SelectTrigger>
-                <SelectValue placeholder="Select team" />
+                <SelectValue placeholder={t("defaultTeam")} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="none">No default team</SelectItem>
+                <SelectItem value="none">{t("noTeam")}</SelectItem>
                 {teams.map((team) => (
                   <SelectItem key={team.id} value={team.id}>
                     {team.name}
@@ -106,7 +108,7 @@ const PlayerDialog = ({
             size="lg"
             disabled={!name.trim()}
           >
-            {editPlayer ? "Save Changes" : "Add Player"}
+            {editPlayer ? t("saveChanges") : t("addPlayer")}
           </Button>
         </div>
       </DialogContent>

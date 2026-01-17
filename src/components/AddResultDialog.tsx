@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import FootballPitch from "./FootballPitch";
 import PlayerSelectModal from "./PlayerSelectModal";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Team {
   id: string;
@@ -99,6 +100,7 @@ const AddResultDialog = ({
   existingMatchPlayers = [],
   isLoadingEditData = false,
 }: AddResultDialogProps) => {
+  const { t } = useLanguage();
   const [homeTeamId, setHomeTeamId] = useState<string>("");
   const [awayTeamId, setAwayTeamId] = useState<string>("");
   const [homeScore, setHomeScore] = useState(0);
@@ -370,7 +372,7 @@ const AddResultDialog = ({
         <DialogContent className="max-w-md max-h-[95vh] p-0 gap-0">
           <DialogHeader className="p-4 pb-2">
             <DialogTitle className="font-display text-xl text-center">
-              {editMatch ? "Edit Result" : "Add a result"}
+              {editMatch ? t("editResult") : t("addAResult")}
             </DialogTitle>
           </DialogHeader>
 

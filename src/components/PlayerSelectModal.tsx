@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface Team {
   id: string;
@@ -30,8 +31,8 @@ interface PlayerSelectModalProps {
   players: Player[];
   selectedTeamId: string;
   onSelectPlayer: (playerId: string) => void;
-  onAddTemporaryPlayer: (name: string) => string; // Returns the temp player ID
-  excludePlayerIds?: string[]; // Players to exclude from selection (already on pitch)
+  onAddTemporaryPlayer: (name: string) => string;
+  excludePlayerIds?: string[];
 }
 
 const PlayerSelectModal = ({
@@ -47,12 +48,12 @@ const PlayerSelectModal = ({
   const [activeTab, setActiveTab] = useState(selectedTeamId || "all");
   const [showNewPlayerInput, setShowNewPlayerInput] = useState(false);
   const [newPlayerName, setNewPlayerName] = useState("");
+  const { t } = useLanguage();
 
   useEffect(() => {
     if (open) setActiveTab(selectedTeamId || "all");
   }, [open, selectedTeamId]);
 
-  // Reset state when modal opens
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       setShowNewPlayerInput(false);
@@ -61,7 +62,6 @@ const PlayerSelectModal = ({
     onOpenChange(open);
   };
 
-  // Get players filtered by team, excluding those already on pitch
   const getPlayersForTeam = (teamId: string) => {
     let filtered = players.filter(p => !excludePlayerIds.includes(p.id));
     if (teamId === "all") {
@@ -90,16 +90,16 @@ const PlayerSelectModal = ({
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle className="font-display text-lg">Select Player</DialogTitle>
+          <DialogTitle className="font-display text-lg">{t("selectPlayer")}</DialogTitle>
         </DialogHeader>
 
         {showNewPlayerInput ? (
           <div className="space-y-4">
             <p className="text-sm text-muted-foreground">
-              Add a player for this match only (won't be saved to database)
+              {t("addNewPlayer")}
             </p>
             <Input
-              placeholder="Player name"
+              placeholder={t("newPlayerName")}
               value={newPlayerName}
               onChange={(e) => setNewPlayerName(e.target.value)}
               onKeyDown={(e) => {
@@ -113,14 +113,14 @@ const PlayerSelectModal = ({
                 className="flex-1"
                 onClick={() => setShowNewPlayerInput(false)}
               >
-                Back
+                {t("back")}
               </Button>
               <Button
                 className="flex-1"
                 onClick={handleAddNewPlayer}
                 disabled={!newPlayerName.trim()}
               >
-                Add Player
+                {t("add")}
               </Button>
             </div>
           </div>
@@ -128,7 +128,7 @@ const PlayerSelectModal = ({
           <>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-3">
-                <TabsTrigger value="all">All</TabsTrigger>
+                <TabsTrigger value="all">{t("allTeams")}</TabsTrigger>
                 {teams.slice(0, 2).map((team) => (
                   <TabsTrigger key={team.id} value={team.id}>
                     {team.name}
@@ -158,7 +158,7 @@ const PlayerSelectModal = ({
                     ))}
                     {currentPlayers.length === 0 && (
                       <p className="text-center text-muted-foreground py-4 text-sm">
-                        No players found
+                        {t("noPlayersFound")}
                       </p>
                     )}
                   </div>
@@ -172,7 +172,7 @@ const PlayerSelectModal = ({
               onClick={() => setShowNewPlayerInput(true)}
             >
               <Plus className="w-4 h-4" />
-              Insert new player (this match only)
+              {t("addNewPlayer")}
             </Button>
 
             <Button
@@ -180,7 +180,7 @@ const PlayerSelectModal = ({
               className="w-full text-muted-foreground"
               onClick={() => handleOpenChange(false)}
             >
-              Cancel
+              {t("cancel")}
             </Button>
           </>
         )}
