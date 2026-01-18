@@ -1,6 +1,6 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowLeft, User, Calendar } from "lucide-react";
-import { format } from "date-fns";
+import { format, getDay, getMonth } from "date-fns";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,26 @@ const MatchDetails = () => {
   const navigate = useNavigate();
   const { data: allPlayers } = usePlayers();
   const { t } = useLanguage();
+
+  const getFullDayName = (date: Date) => {
+    const dayIndex = getDay(date);
+    const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as const;
+    return t(dayKeys[dayIndex]);
+  };
+
+  const getMonthName = (date: Date) => {
+    const monthIndex = getMonth(date);
+    const monthKeys = ['january', 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november', 'december'] as const;
+    return t(monthKeys[monthIndex]);
+  };
+
+  const formatLocalizedDate = (date: Date) => {
+    const dayName = getFullDayName(date);
+    const monthName = getMonthName(date);
+    const day = format(date, "d");
+    const year = format(date, "yyyy");
+    return `${dayName}, ${monthName} ${day}, ${year}`;
+  };
 
   // Fetch match details
   const { data: match, isLoading: matchLoading } = useQuery({
@@ -179,7 +199,7 @@ const MatchDetails = () => {
             </div>
             <div className="flex items-center justify-center gap-2 mt-4 text-muted-foreground text-sm">
               <Calendar className="w-4 h-4" />
-              {format(new Date(match.match_date), "EEEE, MMMM d, yyyy")}
+              {formatLocalizedDate(new Date(match.match_date))}
             </div>
           </CardContent>
         </Card>

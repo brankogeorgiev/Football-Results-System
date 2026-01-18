@@ -120,6 +120,29 @@ export const translations = {
     fri: "Пет",
     sat: "Саб",
     sun: "Нед",
+    
+    // Full day names
+    monday: "Понеделник",
+    tuesday: "Вторник",
+    wednesday: "Среда",
+    thursday: "Четврток",
+    friday: "Петок",
+    saturday: "Сабота",
+    sunday: "Недела",
+    
+    // Month names
+    january: "Јануари",
+    february: "Февруари",
+    march: "Март",
+    april: "Април",
+    may: "Мај",
+    june: "Јуни",
+    july: "Јули",
+    august: "Август",
+    september: "Септември",
+    october: "Октомври",
+    november: "Ноември",
+    december: "Декември",
   },
   en: {
     // Header
@@ -242,6 +265,29 @@ export const translations = {
     fri: "Fri",
     sat: "Sat",
     sun: "Sun",
+    
+    // Full day names
+    monday: "Monday",
+    tuesday: "Tuesday",
+    wednesday: "Wednesday",
+    thursday: "Thursday",
+    friday: "Friday",
+    saturday: "Saturday",
+    sunday: "Sunday",
+    
+    // Month names
+    january: "January",
+    february: "February",
+    march: "March",
+    april: "April",
+    may: "May",
+    june: "June",
+    july: "July",
+    august: "August",
+    september: "September",
+    october: "October",
+    november: "November",
+    december: "December",
   },
 } as const;
 
