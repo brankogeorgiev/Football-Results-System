@@ -24,6 +24,7 @@ import { useMatches, useTeams } from "@/hooks/useMatches";
 import { usePlayers } from "@/hooks/usePlayers";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface GoalWithPlayer {
   id: string;
@@ -50,6 +51,7 @@ const useAllGoals = () => {
 };
 
 const Statistics = () => {
+  const { t } = useLanguage();
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [selectedTeam1, setSelectedTeam1] = useState<string>("all");
@@ -244,11 +246,11 @@ const Statistics = () => {
       <main className="container max-w-lg mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h2 className="font-display font-bold text-xl text-foreground">
-            Statistics
+            {t("statistics")}
           </h2>
           {hasFilters && (
             <Button variant="ghost" size="sm" onClick={clearFilters}>
-              Clear filters
+              {t("clearFilters")}
             </Button>
           )}
         </div>
@@ -258,14 +260,14 @@ const Statistics = () => {
           <CardHeader className="pb-3">
             <CardTitle className="text-sm font-medium flex items-center gap-2">
               <Filter className="w-4 h-4" />
-              Filters
+              {t("filters")}
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* Date Range */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">From</label>
+                <label className="text-xs text-muted-foreground">{t("from")}</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -277,7 +279,7 @@ const Statistics = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-3 w-3" />
-                      {startDate ? format(startDate, "MMM d, yy") : "Start"}
+                      {startDate ? format(startDate, "MMM d, yy") : t("start")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -293,7 +295,7 @@ const Statistics = () => {
                 </Popover>
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">To</label>
+                <label className="text-xs text-muted-foreground">{t("to")}</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
@@ -305,7 +307,7 @@ const Statistics = () => {
                       )}
                     >
                       <CalendarIcon className="mr-2 h-3 w-3" />
-                      {endDate ? format(endDate, "MMM d, yy") : "End"}
+                      {endDate ? format(endDate, "MMM d, yy") : t("end")}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
@@ -325,13 +327,13 @@ const Statistics = () => {
             {/* Team Selectors for Head-to-Head */}
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Team 1</label>
+                <label className="text-xs text-muted-foreground">{t("team1")}</label>
                 <Select value={selectedTeam1} onValueChange={setSelectedTeam1}>
                   <SelectTrigger className="h-9">
-                    <SelectValue placeholder="All teams" />
+                    <SelectValue placeholder={t("allTeams")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All teams</SelectItem>
+                    <SelectItem value="all">{t("allTeams")}</SelectItem>
                     {teams?.map((team) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name}
@@ -341,13 +343,13 @@ const Statistics = () => {
                 </Select>
               </div>
               <div className="space-y-1">
-                <label className="text-xs text-muted-foreground">Team 2</label>
+                <label className="text-xs text-muted-foreground">{t("team2")}</label>
                 <Select value={selectedTeam2} onValueChange={setSelectedTeam2}>
                   <SelectTrigger className="h-9">
-                    <SelectValue placeholder="All teams" />
+                    <SelectValue placeholder={t("allTeams")} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All teams</SelectItem>
+                    <SelectItem value="all">{t("allTeams")}</SelectItem>
                     {teams?.filter((t) => t.id !== selectedTeam1).map((team) => (
                       <SelectItem key={team.id} value={team.id}>
                         {team.name}
@@ -381,13 +383,13 @@ const Statistics = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Users className="w-4 h-4 text-primary" />
-                    Head to Head
+                    {t("headToHead")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="text-center mb-4">
                     <p className="text-xs text-muted-foreground">
-                      {headToHead.totalMatches} matches played
+                      {headToHead.totalMatches} {t("matchesPlayed")}
                     </p>
                   </div>
                   <div className="grid grid-cols-3 gap-4 items-center">
@@ -398,16 +400,16 @@ const Statistics = () => {
                       <p className="text-3xl font-bold text-primary mt-1">
                         {headToHead.team1.wins}
                       </p>
-                      <p className="text-xs text-muted-foreground">wins</p>
+                      <p className="text-xs text-muted-foreground">{t("wins")}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {headToHead.team1.goals} goals
+                        {headToHead.team1.goals} {t("goals")}
                       </p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-bold text-muted-foreground">
                         {headToHead.draws}
                       </p>
-                      <p className="text-xs text-muted-foreground">draws</p>
+                      <p className="text-xs text-muted-foreground">{t("draws")}</p>
                     </div>
                     <div className="text-center">
                       <p className="font-semibold text-foreground truncate">
@@ -416,9 +418,9 @@ const Statistics = () => {
                       <p className="text-3xl font-bold text-primary mt-1">
                         {headToHead.team2.wins}
                       </p>
-                      <p className="text-xs text-muted-foreground">wins</p>
+                      <p className="text-xs text-muted-foreground">{t("wins")}</p>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {headToHead.team2.goals} goals
+                        {headToHead.team2.goals} {t("goals")}
                       </p>
                     </div>
                   </div>
@@ -431,13 +433,13 @@ const Statistics = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Trophy className="w-4 h-4 text-primary" />
-                  Team Standings
+                  {t("teamStandings")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {teamStats.length === 0 ? (
                   <p className="text-center text-muted-foreground py-4">
-                    No matches found
+                    {t("noMatchesFound")}
                   </p>
                 ) : (
                   <div className="space-y-3">
@@ -455,26 +457,26 @@ const Statistics = () => {
                               {team.name}
                             </p>
                             <p className="text-xs text-muted-foreground">
-                              {team.matches} matches
+                              {team.matches} {t("matches")}
                             </p>
                           </div>
                         </div>
                         <div className="flex items-center gap-4 text-sm">
                           <div className="text-center">
                             <p className="font-semibold text-green-500">{team.wins}</p>
-                            <p className="text-xs text-muted-foreground">W</p>
+                            <p className="text-xs text-muted-foreground">{t("w")}</p>
                           </div>
                           <div className="text-center">
                             <p className="font-semibold text-muted-foreground">{team.draws}</p>
-                            <p className="text-xs text-muted-foreground">D</p>
+                            <p className="text-xs text-muted-foreground">{t("d")}</p>
                           </div>
                           <div className="text-center">
                             <p className="font-semibold text-destructive">{team.losses}</p>
-                            <p className="text-xs text-muted-foreground">L</p>
+                            <p className="text-xs text-muted-foreground">{t("l")}</p>
                           </div>
                           <div className="text-center min-w-[40px]">
                             <p className="font-semibold text-primary">{team.goalsScored}</p>
-                            <p className="text-xs text-muted-foreground">GF</p>
+                            <p className="text-xs text-muted-foreground">{t("gd")}</p>
                           </div>
                         </div>
                       </div>
@@ -489,13 +491,13 @@ const Statistics = () => {
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium flex items-center gap-2">
                   <Target className="w-4 h-4 text-primary" />
-                  Top Scorers
+                  {t("topScorers")}
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 {topScorers.length === 0 ? (
                   <p className="text-center text-muted-foreground py-4">
-                    No goals recorded
+                    {t("noGoalsScored")}
                   </p>
                 ) : (
                   <div className="space-y-2">
@@ -528,7 +530,7 @@ const Statistics = () => {
                             {scorer.goals}
                           </span>
                           <span className="text-xs text-muted-foreground">
-                            goals
+                            {t("goals")}
                           </span>
                         </div>
                       </div>
@@ -544,7 +546,7 @@ const Statistics = () => {
                 <CardHeader className="pb-2">
                   <CardTitle className="text-sm font-medium flex items-center gap-2">
                     <Target className="w-4 h-4 text-destructive" />
-                    Own Goals
+                    {t("ownGoals")}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
