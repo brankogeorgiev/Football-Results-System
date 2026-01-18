@@ -103,6 +103,14 @@ export const translations = {
     matchDetails: "Детали за натпревар",
     back: "Назад",
     lineup: "Постава",
+    matchNotFound: "Натпреварот не е пронајден",
+    noGoals: "Без голови",
+    
+    // Statistics - additional
+    w: "П",
+    d: "Н",
+    l: "З",
+    gd: "ГР",
   },
   en: {
     // Header
@@ -208,6 +216,14 @@ export const translations = {
     matchDetails: "Match Details",
     back: "Back",
     lineup: "Lineup",
+    matchNotFound: "Match not found",
+    noGoals: "No goals",
+    
+    // Statistics - additional
+    w: "W",
+    d: "D",
+    l: "L",
+    gd: "GD",
   },
 } as const;
 

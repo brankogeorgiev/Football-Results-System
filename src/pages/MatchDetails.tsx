@@ -10,11 +10,13 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { usePlayers } from "@/hooks/usePlayers";
 import ViewOnlyPitch from "@/components/ViewOnlyPitch";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 const MatchDetails = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { data: allPlayers } = usePlayers();
+  const { t } = useLanguage();
 
   // Fetch match details
   const { data: match, isLoading: matchLoading } = useQuery({
@@ -92,10 +94,10 @@ const MatchDetails = () => {
         <main className="container max-w-lg mx-auto px-4 py-6">
           <Button variant="ghost" onClick={() => navigate("/")} className="gap-2 mb-6">
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {t("back")}
           </Button>
           <div className="text-center py-12">
-            <p className="text-muted-foreground">Match not found</p>
+            <p className="text-muted-foreground">{t("matchNotFound")}</p>
           </div>
         </main>
         <BottomNav />
@@ -135,7 +137,7 @@ const MatchDetails = () => {
         <div className="flex items-center mb-6">
           <Button variant="ghost" onClick={() => navigate("/")} className="gap-2">
             <ArrowLeft className="w-4 h-4" />
-            Back
+            {t("back")}
           </Button>
         </div>
 
@@ -186,7 +188,7 @@ const MatchDetails = () => {
         {(homePlayers.length > 0 || awayPlayers.length > 0) && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-base">Lineup</CardTitle>
+              <CardTitle className="text-base">{t("lineup")}</CardTitle>
             </CardHeader>
             <CardContent>
               <ViewOnlyPitch
@@ -204,7 +206,7 @@ const MatchDetails = () => {
         {(homeGoals.length > 0 || awayGoals.length > 0) && (
           <Card className="mb-6">
             <CardHeader>
-              <CardTitle className="text-base">Goal Scorers</CardTitle>
+              <CardTitle className="text-base">{t("goalScorers")}</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-4">
@@ -236,7 +238,7 @@ const MatchDetails = () => {
                       );
                     })
                   ) : (
-                    <span className="text-sm text-muted-foreground">No goals</span>
+                    <span className="text-sm text-muted-foreground">{t("noGoals")}</span>
                   )}
                 </div>
 
@@ -268,7 +270,7 @@ const MatchDetails = () => {
                       );
                     })
                   ) : (
-                    <span className="text-sm text-muted-foreground">No goals</span>
+                    <span className="text-sm text-muted-foreground">{t("noGoals")}</span>
                   )}
                 </div>
               </div>

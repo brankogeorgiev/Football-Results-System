@@ -1,4 +1,3 @@
-import { Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,11 +10,13 @@ import { useLanguage } from "@/i18n/LanguageContext";
 const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
 
+  const currentFlag = language === "mk" ? "🇲🇰" : "🇬🇧";
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" title="Change language">
-          <Globe className="w-5 h-5" />
+        <Button variant="ghost" size="icon" title="Change language" className="text-xl">
+          {currentFlag}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
