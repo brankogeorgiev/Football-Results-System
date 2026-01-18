@@ -1,5 +1,6 @@
 import { Pencil, Trash2 } from "lucide-react";
-import { format } from "date-fns";
+import { format, getDay } from "date-fns";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ResultCardProps {
   id: string;
@@ -26,6 +27,13 @@ const ResultCard = ({
   onView,
   showActions = true,
 }: ResultCardProps) => {
+  const { t } = useLanguage();
+  
+  const getDayName = (date: Date) => {
+    const dayIndex = getDay(date);
+    const dayKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'] as const;
+    return t(dayKeys[dayIndex]);
+  };
   return (
     <div 
       className="result-card animate-fade-in cursor-pointer hover:border-primary/50 transition-colors"
@@ -64,7 +72,7 @@ const ResultCard = ({
       
       <div className="mt-2 text-right">
         <span className="text-xs text-muted-foreground">
-          {format(new Date(matchDate), "EEE, dd.MM.yyyy")}
+          {getDayName(new Date(matchDate))}, {format(new Date(matchDate), "dd.MM.yyyy")}
         </span>
       </div>
     </div>
