@@ -111,6 +111,15 @@ export const translations = {
     d: "Н",
     l: "З",
     gd: "ГР",
+    
+    // Short day names
+    mon: "Пон",
+    tue: "Вто",
+    wed: "Сре",
+    thu: "Чет",
+    fri: "Пет",
+    sat: "Саб",
+    sun: "Нед",
   },
   en: {
     // Header
@@ -224,6 +233,15 @@ export const translations = {
     d: "D",
     l: "L",
     gd: "GD",
+    
+    // Short day names
+    mon: "Mon",
+    tue: "Tue",
+    wed: "Wed",
+    thu: "Thu",
+    fri: "Fri",
+    sat: "Sat",
+    sun: "Sun",
   },
 } as const;
 
