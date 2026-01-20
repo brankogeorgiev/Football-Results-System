@@ -17,7 +17,7 @@ const LanguageSwitcher = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" title="Change language" className="text-base gap-1 px-2">
-          {currentFlag} {currentCode}
+          {currentCode} {currentFlag}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
