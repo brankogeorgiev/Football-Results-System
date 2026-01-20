@@ -11,12 +11,13 @@ const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
 
   const currentFlag = language === "mk" ? "🇲🇰" : "🇬🇧";
+  const currentCode = language === "mk" ? "MK" : "EN";
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" title="Change language" className="text-xl">
-          {currentFlag}
+        <Button variant="ghost" title="Change language" className="text-base gap-1 px-2">
+          {currentFlag} {currentCode}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
