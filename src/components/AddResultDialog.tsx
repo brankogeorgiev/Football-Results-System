@@ -629,6 +629,7 @@ const AddResultDialog = ({
         onSelectPlayer={handlePlayerSelected}
         onAddTemporaryPlayer={handleAddTemporaryPlayer}
         excludePlayerIds={selectingForGoal ? [] : getPlayersOnPitch()}
+        pitchPlayerIds={selectingForGoal ? (selectingForTeam === "home" ? homePitchPlayers.map(p => p.id) : awayPitchPlayers.map(p => p.id)) : undefined}
       />
     </>
   );
