@@ -10,13 +10,15 @@ import { useLanguage } from "@/i18n/LanguageContext";
 const LanguageSwitcher = () => {
   const { language, setLanguage } = useLanguage();
 
-  const currentFlag = language === "mk" ? "🇲🇰" : "🇬🇧";
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" size="icon" title="Change language" className="text-xl">
-          {currentFlag}
+          {language === "mk" ? (
+            <img src="https://flagcdn.com/w40/mk.png" alt="MK" className="w-6 h-4 object-cover rounded-sm" />
+          ) : (
+            <img src="https://flagcdn.com/w40/gb.png" alt="EN" className="w-6 h-4 object-cover rounded-sm" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
@@ -24,13 +26,15 @@ const LanguageSwitcher = () => {
           onClick={() => setLanguage("mk")}
           className={language === "mk" ? "bg-accent" : ""}
         >
-          🇲🇰 Македонски
+          <img src="https://flagcdn.com/w40/mk.png" alt="MK" className="w-5 h-3 object-cover rounded-sm mr-2" />
+          Македонски
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={() => setLanguage("en")}
           className={language === "en" ? "bg-accent" : ""}
         >
-          🇬🇧 English
+          <img src="https://flagcdn.com/w40/gb.png" alt="EN" className="w-5 h-3 object-cover rounded-sm mr-2" />
+          English
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
