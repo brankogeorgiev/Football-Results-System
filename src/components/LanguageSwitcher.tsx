@@ -13,11 +13,17 @@ const LanguageSwitcher = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" title="Change language" className="text-xl">
+        <Button variant="ghost" title="Change language" className="gap-2 px-2">
           {language === "mk" ? (
-            <img src="https://flagcdn.com/w40/mk.png" alt="MK" className="w-6 h-4 object-cover rounded-sm" />
+            <>
+              <img src="https://flagcdn.com/w40/mk.png" alt="MK" className="w-6 h-4 object-cover rounded-sm" />
+              <span>MK</span>
+            </>
           ) : (
-            <img src="https://flagcdn.com/w40/gb.png" alt="EN" className="w-6 h-4 object-cover rounded-sm" />
+            <>
+              <img src="https://flagcdn.com/w40/gb.png" alt="EN" className="w-6 h-4 object-cover rounded-sm" />
+              <span>EN</span>
+            </>
           )}
         </Button>
       </DropdownMenuTrigger>
