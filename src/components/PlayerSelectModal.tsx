@@ -24,6 +24,11 @@ interface Player {
   isTemporary?: boolean;
 }
 
+interface PitchPlayerAssignment {
+  playerId: string;
+  teamId: string;
+}
+
 interface PlayerSelectModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -33,7 +38,7 @@ interface PlayerSelectModalProps {
   onSelectPlayer: (playerId: string) => void;
   onAddTemporaryPlayer: (name: string) => string;
   excludePlayerIds?: string[];
-  pitchPlayerIds?: string[]; // If provided, only show these players (for goal scorer selection)
+  pitchPlayerAssignments?: PitchPlayerAssignment[]; // Players on pitch with their match team assignment
 }
 
 const PlayerSelectModal = ({
@@ -45,7 +50,7 @@ const PlayerSelectModal = ({
   onSelectPlayer,
   onAddTemporaryPlayer,
   excludePlayerIds = [],
-  pitchPlayerIds,
+  pitchPlayerAssignments,
 }: PlayerSelectModalProps) => {
   const [activeTab, setActiveTab] = useState(selectedTeamId || "all");
   const [showNewPlayerInput, setShowNewPlayerInput] = useState(false);
@@ -67,10 +72,23 @@ const PlayerSelectModal = ({
   const getPlayersForTeam = (teamId: string) => {
     let filtered = players.filter(p => !excludePlayerIds.includes(p.id));
     
-    // If pitchPlayerIds is provided, only show those players (for goal scorer selection)
-    if (pitchPlayerIds) {
+    // If pitchPlayerAssignments is provided, filter and group by match team assignment
+    if (pitchPlayerAssignments) {
+      const pitchPlayerIds = pitchPlayerAssignments.map(p => p.playerId);
       filtered = filtered.filter(p => pitchPlayerIds.includes(p.id));
-      return filtered.sort((a, b) => a.name.localeCompare(b.name));
+      
+      if (teamId === "all") {
+        return filtered.sort((a, b) => a.name.localeCompare(b.name));
+      }
+      
+      // Filter by match team assignment, not default team
+      const playerIdsForTeam = pitchPlayerAssignments
+        .filter(p => p.teamId === teamId)
+        .map(p => p.playerId);
+      
+      return filtered
+        .filter(p => playerIdsForTeam.includes(p.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
     }
     
     if (teamId === "all") {
