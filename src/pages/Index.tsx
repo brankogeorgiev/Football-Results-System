@@ -31,7 +31,7 @@ const Index = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editMatch, setEditMatch] = useState<Match | null>(null);
   const [deleteMatchId, setDeleteMatchId] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { t } = useLanguage();
 
   const { data: matches, isLoading: matchesLoading } = useMatches();
@@ -170,7 +170,7 @@ const Index = () => {
           <h2 className="font-display font-bold text-xl text-foreground">
             {t("pastResults")}
           </h2>
-          {user && (
+          {isAdmin && (
             <Button onClick={handleAddResult} size="sm" className="gap-1">
               <Plus className="w-4 h-4" />
               {t("addResult")}
@@ -215,7 +215,7 @@ const Index = () => {
                 onEdit={handleEdit}
                 onDelete={handleDelete}
                 onView={handleView}
-                showActions={!!user}
+                showActions={isAdmin}
               />
             ))
           ) : (
@@ -223,7 +223,7 @@ const Index = () => {
               <p className="text-muted-foreground mb-4">
                 {t("noMatchesRecorded")}
               </p>
-              {user && (
+              {isAdmin && (
                 <Button onClick={handleAddResult} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   {t("addFirstResult")}

@@ -23,7 +23,7 @@ const Players = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [editPlayer, setEditPlayer] = useState<Player | null>(null);
   const [deletePlayerId, setDeletePlayerId] = useState<string | null>(null);
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const { t } = useLanguage();
 
   const { data: players, isLoading: playersLoading } = usePlayers();
@@ -77,7 +77,7 @@ const Players = () => {
           <h2 className="font-display font-bold text-xl text-foreground">
             {t("players")}
           </h2>
-          {user && (
+          {isAdmin && (
             <Button onClick={handleAddPlayer} size="sm" className="gap-1">
               <Plus className="w-4 h-4" />
               {t("addPlayer")}
@@ -112,13 +112,13 @@ const Players = () => {
                 defaultTeamName={player.default_team?.name}
                 onEdit={handleEdit}
                 onDelete={handleDelete}
-                showActions={!!user}
+                showActions={isAdmin}
               />
             ))
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground mb-4">{t("noPlayersAdded")}</p>
-              {user && (
+              {isAdmin && (
                 <Button onClick={handleAddPlayer} variant="outline">
                   <Plus className="w-4 h-4 mr-2" />
                   {t("addFirstPlayer")}

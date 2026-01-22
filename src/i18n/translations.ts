@@ -143,6 +143,15 @@ export const translations = {
     october: "Октомври",
     november: "Ноември",
     december: "Декември",
+    
+    // Admin
+    adminAccessRequired: "Потребен е администраторски пристап",
+    manageAdmins: "Управување со администратори",
+    currentAdmins: "Тековни администратори",
+    admin: "Администратор",
+    noAdmins: "Нема администратори",
+    adminInfo: "Администраторите можат да додаваат, уредуваат и бришат натпревари и играчи. Новите корисници мора прво да се регистрираат пред да им се додели администраторска улога.",
+    adminPanel: "Админ панел",
   },
   en: {
     // Header
@@ -288,6 +297,15 @@ export const translations = {
     october: "October",
     november: "November",
     december: "December",
+    
+    // Admin
+    adminAccessRequired: "Admin access required",
+    manageAdmins: "Manage Admins",
+    currentAdmins: "Current Admins",
+    admin: "Admin",
+    noAdmins: "No admins",
+    adminInfo: "Admins can add, edit, and delete matches and players. New users must first sign up before they can be assigned an admin role.",
+    adminPanel: "Admin Panel",
   },
 } as const;
 
