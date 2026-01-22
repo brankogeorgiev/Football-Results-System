@@ -141,11 +141,14 @@ const MatchDetails = () => {
     return player?.name || "Unknown";
   };
 
-  // Check if a goal is an own goal (player's default team is the opposing team)
-  const isOwnGoal = (playerId: string, scoringForTeamId: string, opposingTeamId: string) => {
-    const player = allPlayers?.find((p) => p.id === playerId);
-    if (!player || !player.default_team_id) return false;
-    return player.default_team_id === opposingTeamId;
+  // Check if a goal is an own goal (player was playing for the opposing team in this match)
+  const isOwnGoal = (playerId: string, scoringForTeamId: string) => {
+    // Find which team this player was assigned to in this match
+    const playerMatchAssignment = matchPlayers?.find((mp) => mp.player_id === playerId);
+    if (!playerMatchAssignment) return false;
+    
+    // If the goal is credited to a team but the player was playing for the opposing team
+    return playerMatchAssignment.team_id !== scoringForTeamId;
   };
 
   return (
@@ -237,7 +240,7 @@ const MatchDetails = () => {
                   </div>
                   {homeGoals.length > 0 ? (
                     homeGoals.map((goal) => {
-                      const ownGoal = isOwnGoal(goal.player_id, match.home_team_id, match.away_team_id);
+                      const ownGoal = isOwnGoal(goal.player_id, match.home_team_id);
                       return (
                         <div
                           key={goal.id}
@@ -269,7 +272,7 @@ const MatchDetails = () => {
                   </div>
                   {awayGoals.length > 0 ? (
                     awayGoals.map((goal) => {
-                      const ownGoal = isOwnGoal(goal.player_id, match.away_team_id, match.home_team_id);
+                      const ownGoal = isOwnGoal(goal.player_id, match.away_team_id);
                       return (
                         <div
                           key={goal.id}
