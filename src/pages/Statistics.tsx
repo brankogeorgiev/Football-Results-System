@@ -31,7 +31,14 @@ interface GoalWithPlayer {
   match_id: string;
   player_id: string;
   team_id: string;
-  player?: { id: string; name: string; default_team_id: string | null };
+  player?: { id: string; name: string };
+}
+
+interface MatchPlayerRecord {
+  id: string;
+  match_id: string;
+  player_id: string;
+  team_id: string;
 }
 
 const useAllGoals = () => {
@@ -42,10 +49,23 @@ const useAllGoals = () => {
         .from("goals")
         .select(`
           *,
-          player:players(id, name, default_team_id)
+          player:players(id, name)
         `);
       if (error) throw error;
       return data as GoalWithPlayer[];
+    },
+  });
+};
+
+const useAllMatchPlayers = () => {
+  return useQuery({
+    queryKey: ["all-match-players"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("match_players")
+        .select("*");
+      if (error) throw error;
+      return data as MatchPlayerRecord[];
     },
   });
 };
@@ -61,8 +81,9 @@ const Statistics = () => {
   const { data: teams, isLoading: teamsLoading } = useTeams();
   const { data: players, isLoading: playersLoading } = usePlayers();
   const { data: allGoals, isLoading: goalsLoading } = useAllGoals();
+  const { data: allMatchPlayers, isLoading: matchPlayersLoading } = useAllMatchPlayers();
 
-  const isLoading = matchesLoading || teamsLoading || playersLoading || goalsLoading;
+  const isLoading = matchesLoading || teamsLoading || playersLoading || goalsLoading || matchPlayersLoading;
 
   // Filter matches by date range and teams
   const filteredMatches = useMemo(() => {
@@ -132,14 +153,20 @@ const Statistics = () => {
     }).sort((a, b) => b.wins - a.wins || b.goalDifference - a.goalDifference);
   }, [teams, filteredMatches]);
 
-  // Helper to check if a goal is an own goal
+  // Helper to check if a goal is an own goal (based on match team assignment, not default team)
   const isOwnGoal = (goal: GoalWithPlayer, matches: typeof filteredMatches) => {
     const match = matches.find((m) => m.id === goal.match_id);
-    if (!match || !goal.player?.default_team_id) return false;
+    if (!match || !allMatchPlayers) return false;
     
-    // If the goal is credited to a team but the player's default team is the opposing team
-    const opposingTeamId = goal.team_id === match.home_team_id ? match.away_team_id : match.home_team_id;
-    return goal.player.default_team_id === opposingTeamId;
+    // Find the team this player was assigned to in this match
+    const playerMatchAssignment = allMatchPlayers.find(
+      (mp) => mp.match_id === goal.match_id && mp.player_id === goal.player_id
+    );
+    
+    if (!playerMatchAssignment) return false;
+    
+    // If the goal is credited to a team but the player was playing for the opposing team
+    return playerMatchAssignment.team_id !== goal.team_id;
   };
 
   // Calculate top scorers (excluding own goals)

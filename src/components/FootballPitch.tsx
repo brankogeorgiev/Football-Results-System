@@ -81,9 +81,7 @@ const FootballPitch = ({
   const [openPopover, setOpenPopover] = useState<string | null>(null);
   const getPlayerName = (playerId: string) => {
     const player = allPlayers.find((p) => p.id === playerId);
-    if (!player) return "Player";
-    const names = player.name.split(" ");
-    return names[0].substring(0, 8);
+    return player?.name || "Player";
   };
 
   const getPlayerAtPosition = (team: "home" | "away", positionIndex: number) => {
