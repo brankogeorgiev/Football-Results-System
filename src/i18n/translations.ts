@@ -152,6 +152,10 @@ export const translations = {
     noAdmins: "Нема администратори",
     adminInfo: "Администраторите можат да додаваат, уредуваат и бришат натпревари и играчи. Новите корисници мора прво да се регистрираат пред да им се додели администраторска улога.",
     adminPanel: "Админ панел",
+    allUsers: "Сите корисници",
+    makeAdmin: "Направи админ",
+    noOtherUsers: "Нема други корисници",
+    cannotRemoveOwnAdmin: "Не можете да ја отстраните сопствената администраторска улога",
   },
   en: {
     // Header
@@ -306,6 +310,10 @@ export const translations = {
     noAdmins: "No admins",
     adminInfo: "Admins can add, edit, and delete matches and players. New users must first sign up before they can be assigned an admin role.",
     adminPanel: "Admin Panel",
+    allUsers: "All Users",
+    makeAdmin: "Make Admin",
+    noOtherUsers: "No other users",
+    cannotRemoveOwnAdmin: "You cannot remove your own admin role",
   },
 } as const;
 
