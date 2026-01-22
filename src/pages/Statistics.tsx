@@ -139,6 +139,8 @@ const Statistics = () => {
         else losses++;
       });
 
+      const points = wins * 3 + draws;
+      
       return {
         id: team.id,
         name: team.name,
@@ -149,8 +151,9 @@ const Statistics = () => {
         goalsScored,
         goalsConceded,
         goalDifference: goalsScored - goalsConceded,
+        points,
       };
-    }).sort((a, b) => b.wins - a.wins || b.goalDifference - a.goalDifference);
+    }).sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference);
   }, [teams, filteredMatches]);
 
   // Helper to check if a goal is an own goal (based on match team assignment, not default team)
@@ -502,8 +505,12 @@ const Statistics = () => {
                             <p className="text-xs text-muted-foreground">{t("l")}</p>
                           </div>
                           <div className="text-center min-w-[40px]">
-                            <p className="font-semibold text-primary">{team.goalsScored}</p>
+                            <p className="font-semibold text-foreground">{team.goalsScored}-{team.goalsConceded}</p>
                             <p className="text-xs text-muted-foreground">{t("gd")}</p>
+                          </div>
+                          <div className="text-center min-w-[32px]">
+                            <p className="font-bold text-primary">{team.points}</p>
+                            <p className="text-xs text-muted-foreground">{t("pts")}</p>
                           </div>
                         </div>
                       </div>

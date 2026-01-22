@@ -110,6 +110,7 @@ export const translations = {
     w: "П",
     d: "Н",
     l: "З",
+    pts: "Бод",
     gd: "ГР",
     
     // Short day names
@@ -269,6 +270,7 @@ export const translations = {
     d: "D",
     l: "L",
     gd: "GD",
+    pts: "Pts",
     
     // Short day names
     mon: "Mon",
