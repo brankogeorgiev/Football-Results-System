@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Trophy, User, LogOut } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Trophy, User, LogOut, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 import AuthDialog from "@/components/AuthDialog";
@@ -8,8 +9,9 @@ import { useLanguage } from "@/i18n/LanguageContext";
 import { toast } from "sonner";
 
 const Header = () => {
+  const navigate = useNavigate();
   const [authOpen, setAuthOpen] = useState(false);
-  const { user, loading, signOut } = useAuth();
+  const { user, isAdmin, loading, signOut } = useAuth();
   const { t } = useLanguage();
 
   const handleSignOut = async () => {
@@ -39,6 +41,16 @@ const Header = () => {
             <LanguageSwitcher />
             {!loading && (
               <>
+                {isAdmin && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => navigate("/admin/users")} 
+                    title={t("adminPanel")}
+                  >
+                    <Shield className="w-5 h-5 text-primary" />
+                  </Button>
+                )}
                 {user ? (
                   <Button variant="ghost" size="icon" onClick={handleSignOut} title={t("signOut")}>
                     <LogOut className="w-5 h-5" />
