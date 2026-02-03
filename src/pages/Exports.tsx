@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Download, FileSpreadsheet, RefreshCw } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Download, FileSpreadsheet, Plus, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import BottomNav from "@/components/BottomNav";
+import { useLanguage } from "@/i18n/LanguageContext";
 
 interface ExportFile {
   name: string;
@@ -16,7 +17,9 @@ interface ExportFile {
 const Exports = () => {
   const [files, setFiles] = useState<ExportFile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const [downloading, setDownloading] = useState<string | null>(null);
+  const { t } = useLanguage();
 
   const fetchExports = async () => {
     setLoading(true);
@@ -25,7 +28,7 @@ const Exports = () => {
       .list("", { sortBy: { column: "created_at", order: "desc" } });
 
     if (error) {
-      toast.error("Failed to load exports");
+      toast.error(t("failedToLoadExports"));
       console.error(error);
     } else {
       setFiles(data || []);
@@ -36,6 +39,32 @@ const Exports = () => {
   useEffect(() => {
     fetchExports();
   }, []);
+
+  const handleGenerateExport = async () => {
+    setGenerating(true);
+    try {
+      const today = new Date().toISOString().split("T")[0];
+      const todayFilename = `data-export-${today}.xlsx`;
+      
+      // Check if today's export already exists
+      const existingFile = files.find(f => f.name === todayFilename);
+      
+      const { data, error } = await supabase.functions.invoke("export-data");
+      
+      if (error) throw error;
+      
+      if (data.success) {
+        toast.success(existingFile ? t("exportRefreshed") : t("exportCreated"));
+        await fetchExports();
+      } else {
+        throw new Error(data.error || "Export failed");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error(t("failedToGenerateExport"));
+    }
+    setGenerating(false);
+  };
 
   const handleDownload = async (filename: string) => {
     setDownloading(filename);
@@ -53,10 +82,10 @@ const Exports = () => {
       link.click();
       document.body.removeChild(link);
       
-      toast.success("Download started");
+      toast.success(t("downloadStarted"));
     } catch (error) {
       console.error(error);
-      toast.error("Failed to download file");
+      toast.error(t("failedToDownload"));
     }
     setDownloading(null);
   };
@@ -67,19 +96,25 @@ const Exports = () => {
       
       <main className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold">Data Exports</h1>
-          <Button variant="outline" size="sm" onClick={fetchExports} disabled={loading}>
-            <RefreshCw className={`h-4 w-4 mr-2 ${loading ? "animate-spin" : ""}`} />
-            Refresh
+          <h1 className="text-2xl font-bold">{t("exports")}</h1>
+          <Button onClick={handleGenerateExport} disabled={generating}>
+            {generating ? (
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+            ) : (
+              <Plus className="h-4 w-4 mr-2" />
+            )}
+            {t("newExport")}
           </Button>
         </div>
 
         {loading ? (
-          <div className="text-center py-12 text-muted-foreground">Loading exports...</div>
+          <div className="text-center py-12 text-muted-foreground">
+            {t("loadingExports")}
+          </div>
         ) : files.length === 0 ? (
           <Card>
             <CardContent className="py-12 text-center text-muted-foreground">
-              No exports available yet. Exports are generated weekly.
+              {t("noExportsAvailable")}
             </CardContent>
           </Card>
         ) : (
@@ -88,7 +123,7 @@ const Exports = () => {
               <Card key={file.name}>
                 <CardContent className="flex items-center justify-between py-4">
                   <div className="flex items-center gap-3">
-                    <FileSpreadsheet className="h-8 w-8 text-green-600" />
+                    <FileSpreadsheet className="h-8 w-8 text-primary" />
                     <div>
                       <p className="font-medium">{file.name}</p>
                       <p className="text-sm text-muted-foreground">
@@ -102,7 +137,7 @@ const Exports = () => {
                     disabled={downloading === file.name}
                   >
                     <Download className="h-4 w-4 mr-2" />
-                    {downloading === file.name ? "Downloading..." : "Download"}
+                    {downloading === file.name ? t("downloading") : t("download")}
                   </Button>
                 </CardContent>
               </Card>
