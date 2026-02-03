@@ -573,7 +573,7 @@ const Statistics = () => {
                     ))}
                     {topScorers.length > 3 && (
                       <Button
-                        variant="ghost"
+                        variant="default"
                         size="sm"
                         className="w-full mt-2"
                         onClick={() => setShowAllScorers(!showAllScorers)}
@@ -626,7 +626,7 @@ const Statistics = () => {
                     ))}
                     {ownGoalScorers.length > 3 && (
                       <Button
-                        variant="ghost"
+                        variant="default"
                         size="sm"
                         className="w-full mt-2"
                         onClick={() => setShowAllOwnGoals(!showAllOwnGoals)}
