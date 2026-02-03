@@ -10,6 +10,7 @@ export const translations = {
     results: "Резултати",
     players: "Играчи",
     stats: "Статистика",
+    exports: "Извоз",
     
     // Index page
     pastResults: "Минати резултати",
@@ -47,6 +48,17 @@ export const translations = {
     noOwnGoals: "Нема автоголови",
     showMore: "Прикажи повеќе",
     showLess: "Прикажи помалку",
+    newExport: "Нов извоз",
+    loadingExports: "Се вчитуваат извози...",
+    noExportsAvailable: "Нема достапни извози. Кликнете 'Нов извоз' за да генерирате.",
+    exportRefreshed: "Извозот е освежен!",
+    exportCreated: "Нов извоз е креиран!",
+    failedToLoadExports: "Неуспешно вчитување на извози",
+    failedToGenerateExport: "Неуспешно генерирање на извоз",
+    failedToDownload: "Неуспешно преземање",
+    downloadStarted: "Преземањето започна",
+    downloading: "Се презема...",
+    download: "Преземи",
     
     // Auth dialog
     account: "Сметка",
@@ -171,6 +183,7 @@ export const translations = {
     results: "Results",
     players: "Players",
     stats: "Stats",
+    exports: "Exports",
     
     // Index page
     pastResults: "Past Results",
@@ -208,6 +221,17 @@ export const translations = {
     noOwnGoals: "No own goals",
     showMore: "Show more",
     showLess: "Show less",
+    newExport: "New Export",
+    loadingExports: "Loading exports...",
+    noExportsAvailable: "No exports available. Click 'New Export' to generate one.",
+    exportRefreshed: "Export refreshed!",
+    exportCreated: "New export created!",
+    failedToLoadExports: "Failed to load exports",
+    failedToGenerateExport: "Failed to generate export",
+    failedToDownload: "Failed to download file",
+    downloadStarted: "Download started",
+    downloading: "Downloading...",
+    download: "Download",
     
     // Auth dialog
     account: "Account",

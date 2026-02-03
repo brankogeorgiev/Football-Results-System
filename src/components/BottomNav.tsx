@@ -1,24 +1,36 @@
 import { Link, useLocation } from "react-router-dom";
-import { Trophy, Users, BarChart3 } from "lucide-react";
+import { Trophy, Users, BarChart3, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useLanguage } from "@/i18n/LanguageContext";
 import { TranslationKey } from "@/i18n/translations";
+import { useAuth } from "@/hooks/useAuth";
 
-const navItems = [
-  { path: "/", labelKey: "results" as TranslationKey, icon: Trophy },
-  { path: "/players", labelKey: "players" as TranslationKey, icon: Users },
-  { path: "/statistics", labelKey: "stats" as TranslationKey, icon: BarChart3 },
+interface NavItem {
+  path: string;
+  labelKey: TranslationKey;
+  icon: React.ComponentType<{ className?: string }>;
+  adminOnly?: boolean;
+}
+
+const navItems: NavItem[] = [
+  { path: "/", labelKey: "results", icon: Trophy },
+  { path: "/players", labelKey: "players", icon: Users },
+  { path: "/statistics", labelKey: "stats", icon: BarChart3 },
+  { path: "/exports", labelKey: "exports", icon: Download, adminOnly: true },
 ];
 
 const BottomNav = () => {
   const location = useLocation();
   const { t } = useLanguage();
+  const { isAdmin } = useAuth();
+
+  const visibleItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border/50 z-50">
       <div className="container max-w-lg mx-auto px-4">
         <div className="flex items-center justify-around py-2">
-          {navItems.map((item) => {
+          {visibleItems.map((item) => {
             const isActive = location.pathname === item.path;
             const Icon = item.icon;
 
