@@ -45,6 +45,8 @@ export const translations = {
     noGoalsScored: "Нема постигнати голови",
     ownGoals: "Автоголови",
     noOwnGoals: "Нема автоголови",
+    showMore: "Прикажи повеќе",
+    showLess: "Прикажи помалку",
     
     // Auth dialog
     account: "Сметка",
@@ -204,6 +206,8 @@ export const translations = {
     noGoalsScored: "No goals scored",
     ownGoals: "Own Goals",
     noOwnGoals: "No own goals",
+    showMore: "Show more",
+    showLess: "Show less",
     
     // Auth dialog
     account: "Account",

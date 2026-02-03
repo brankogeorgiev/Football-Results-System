@@ -76,6 +76,8 @@ const Statistics = () => {
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [selectedTeam1, setSelectedTeam1] = useState<string>("all");
   const [selectedTeam2, setSelectedTeam2] = useState<string>("all");
+  const [showAllScorers, setShowAllScorers] = useState(false);
+  const [showAllOwnGoals, setShowAllOwnGoals] = useState(false);
 
   const { data: matches, isLoading: matchesLoading } = useMatches();
   const { data: teams, isLoading: teamsLoading } = useTeams();
@@ -535,7 +537,7 @@ const Statistics = () => {
                   </p>
                 ) : (
                   <div className="space-y-2">
-                    {topScorers.map((scorer, index) => (
+                    {(showAllScorers ? topScorers : topScorers.slice(0, 3)).map((scorer, index) => (
                       <div
                         key={scorer.id}
                         className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
@@ -569,23 +571,37 @@ const Statistics = () => {
                         </div>
                       </div>
                     ))}
+                    {topScorers.length > 3 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={() => setShowAllScorers(!showAllScorers)}
+                      >
+                        {showAllScorers ? t("showLess") : t("showMore")}
+                      </Button>
+                    )}
                   </div>
                 )}
               </CardContent>
             </Card>
 
             {/* Own Goals */}
-            {ownGoalScorers.length > 0 && (
-              <Card className="border-destructive/30">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Target className="w-4 h-4 text-destructive" />
-                    {t("ownGoals")}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+            <Card className="border-destructive/30">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Target className="w-4 h-4 text-destructive" />
+                  {t("ownGoals")}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {ownGoalScorers.length === 0 ? (
+                  <p className="text-center text-muted-foreground py-4">
+                    {t("noOwnGoals")}
+                  </p>
+                ) : (
                   <div className="space-y-2">
-                    {ownGoalScorers.map((scorer, index) => (
+                    {(showAllOwnGoals ? ownGoalScorers : ownGoalScorers.slice(0, 3)).map((scorer, index) => (
                       <div
                         key={scorer.id}
                         className="flex items-center justify-between py-2 border-b border-border/50 last:border-0"
@@ -608,10 +624,20 @@ const Statistics = () => {
                         </div>
                       </div>
                     ))}
+                    {ownGoalScorers.length > 3 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-2"
+                        onClick={() => setShowAllOwnGoals(!showAllOwnGoals)}
+                      >
+                        {showAllOwnGoals ? t("showLess") : t("showMore")}
+                      </Button>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
-            )}
+                )}
+              </CardContent>
+            </Card>
           </div>
         )}
       </main>
