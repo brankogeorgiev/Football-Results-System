@@ -339,7 +339,7 @@ const AddResultDialog = ({
 
   const getPlayerName = (playerId: string) => {
     const player = allPlayers.find((p) => p.id === playerId);
-    return player?.name?.split(" ")[0] || "Player";
+    return player?.name || "Player";
   };
 
   // Check if a goal is an own goal (player from opposite team)
