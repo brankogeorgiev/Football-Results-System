@@ -86,15 +86,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only admins can POST/DELETE
-    if (!adminRole) {
-      return new Response(JSON.stringify({ error: "Admin access required" }), {
-        status: 403,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    // POST - Add role
+    // POST - Add role (any authenticated user can create their own role)
     if (req.method === "POST") {
       const body = await req.json();
       const { user_id, role } = body;
@@ -102,6 +94,22 @@ Deno.serve(async (req) => {
       if (!user_id || !role) {
         return new Response(JSON.stringify({ error: "user_id and role are required" }), {
           status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Non-admins can only assign roles to themselves
+      if (!adminRole && user_id !== user.id) {
+        return new Response(JSON.stringify({ error: "You can only assign a role to yourself" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Non-admins cannot assign the admin role
+      if (!adminRole && role === "admin") {
+        return new Response(JSON.stringify({ error: "Only admins can assign the admin role" }), {
+          status: 403,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -118,6 +126,16 @@ Deno.serve(async (req) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Only admins can DELETE
+    if (!adminRole) {
+      return new Response(JSON.stringify({ error: "Admin access required" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // DELETE - Remove role
 
     // DELETE - Remove role
     if (req.method === "DELETE") {
