@@ -101,7 +101,7 @@ const ViewOnlyPitch = ({
           >
             <User className={`w-5 h-5 ${textColor}`} />
           </div>
-          <span className="text-[10px] text-white font-medium mt-0.5 bg-black/40 px-1.5 py-0.5 rounded max-w-[60px] truncate">
+          <span className="text-[10px] text-white font-medium mt-0.5 bg-black/40 px-1.5 py-0.5 rounded whitespace-nowrap">
             {getPlayerName(player.id)}
           </span>
         </div>
