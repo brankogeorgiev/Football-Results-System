@@ -31,6 +31,7 @@ interface GoalWithPlayer {
   match_id: string;
   player_id: string;
   team_id: string;
+  is_own_goal: boolean;
   player?: { id: string; name: string };
 }
 
@@ -158,20 +159,9 @@ const Statistics = () => {
     }).sort((a, b) => b.points - a.points || b.goalDifference - a.goalDifference);
   }, [teams, filteredMatches]);
 
-  // Helper to check if a goal is an own goal (based on match team assignment, not default team)
-  const isOwnGoal = (goal: GoalWithPlayer, matches: typeof filteredMatches) => {
-    const match = matches.find((m) => m.id === goal.match_id);
-    if (!match || !allMatchPlayers) return false;
-    
-    // Find the team this player was assigned to in this match
-    const playerMatchAssignment = allMatchPlayers.find(
-      (mp) => mp.match_id === goal.match_id && mp.player_id === goal.player_id
-    );
-    
-    if (!playerMatchAssignment) return false;
-    
-    // If the goal is credited to a team but the player was playing for the opposing team
-    return playerMatchAssignment.team_id !== goal.team_id;
+  // Check if a goal is an own goal using the stored is_own_goal field
+  const isOwnGoal = (goal: GoalWithPlayer) => {
+    return goal.is_own_goal === true;
   };
 
   // Calculate top scorers (excluding own goals)
@@ -179,7 +169,7 @@ const Statistics = () => {
     if (!allGoals || !players || !filteredMatches) return [];
 
     const matchIds = new Set(filteredMatches.map((m) => m.id));
-    const filteredGoals = allGoals.filter((g) => matchIds.has(g.match_id) && !isOwnGoal(g, filteredMatches));
+    const filteredGoals = allGoals.filter((g) => matchIds.has(g.match_id) && !isOwnGoal(g));
 
     const scorerMap = new Map<string, { name: string; goals: number }>();
 
@@ -204,7 +194,7 @@ const Statistics = () => {
     if (!allGoals || !filteredMatches) return [];
 
     const matchIds = new Set(filteredMatches.map((m) => m.id));
-    const ownGoals = allGoals.filter((g) => matchIds.has(g.match_id) && isOwnGoal(g, filteredMatches));
+    const ownGoals = allGoals.filter((g) => matchIds.has(g.match_id) && isOwnGoal(g));
 
     const scorerMap = new Map<string, { name: string; goals: number }>();
 
