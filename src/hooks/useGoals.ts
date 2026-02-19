@@ -7,6 +7,7 @@ export interface Goal {
   match_id: string;
   player_id: string;
   team_id: string;
+  is_own_goal: boolean;
   created_at: string;
   player?: { id: string; name: string };
 }
@@ -39,7 +40,7 @@ export const useSaveMatchGoals = () => {
       goals,
     }: {
       matchId: string;
-      goals: { playerId: string; teamId: string }[];
+      goals: { playerId: string; teamId: string; isOwnGoal?: boolean }[];
     }) => {
       // Delete existing goals for this match
       const { error: deleteError } = await supabase
@@ -56,6 +57,7 @@ export const useSaveMatchGoals = () => {
             match_id: matchId,
             player_id: goal.playerId,
             team_id: goal.teamId,
+            is_own_goal: goal.isOwnGoal ?? false,
           }))
         );
         if (insertError) throw insertError;

@@ -1,0 +1,1 @@
+ALTER TABLE public.goals ADD COLUMN is_own_goal boolean NOT NULL DEFAULT false;

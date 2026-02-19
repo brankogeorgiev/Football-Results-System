@@ -66,6 +66,7 @@ Deno.serve(async (req) => {
           match_id: g.match_id,
           player_id: g.player_id,
           team_id: g.team_id,
+          is_own_goal: g.is_own_goal ?? false,
         }));
         
         const { data, error } = await supabase
@@ -80,7 +81,7 @@ Deno.serve(async (req) => {
         });
       } else {
         // Single insert
-        const { match_id, player_id, team_id } = body;
+        const { match_id, player_id, team_id, is_own_goal } = body;
         
         if (!match_id || !player_id || !team_id) {
           return new Response(JSON.stringify({ error: "match_id, player_id, and team_id are required" }), {
@@ -91,7 +92,7 @@ Deno.serve(async (req) => {
 
         const { data, error } = await supabase
           .from("goals")
-          .insert({ match_id, player_id, team_id })
+          .insert({ match_id, player_id, team_id, is_own_goal: is_own_goal ?? false })
           .select(`*, player:players(id, name)`)
           .single();
         
