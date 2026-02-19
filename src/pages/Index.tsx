@@ -112,14 +112,33 @@ const Index = () => {
       matchDate: data.matchDate,
     };
 
+    // Determine own goals based on pitch assignments
+    const homePitchPlayerIds = new Set(data.homePitchPlayers.map(pp => resolvePlayerId(pp.id)));
+    const awayPitchPlayerIds = new Set(data.awayPitchPlayers.map(pp => resolvePlayerId(pp.id)));
+
+    const isOwnGoal = (playerId: string, scoringTeamId: string) => {
+      const resolvedId = resolvePlayerId(playerId);
+      // Check pitch assignment first
+      if (homePitchPlayerIds.has(resolvedId) || awayPitchPlayerIds.has(resolvedId)) {
+        const playerTeamId = homePitchPlayerIds.has(resolvedId) ? data.homeTeamId : data.awayTeamId;
+        return playerTeamId !== scoringTeamId;
+      }
+      // Fallback to default team
+      const player = players?.find(p => p.id === resolvedId);
+      if (!player?.default_team_id) return false;
+      return player.default_team_id !== scoringTeamId;
+    };
+
     const goals = [
       ...data.homeGoals.map((playerId) => ({
         playerId: resolvePlayerId(playerId),
         teamId: data.homeTeamId,
+        isOwnGoal: isOwnGoal(playerId, data.homeTeamId),
       })),
       ...data.awayGoals.map((playerId) => ({
         playerId: resolvePlayerId(playerId),
         teamId: data.awayTeamId,
+        isOwnGoal: isOwnGoal(playerId, data.awayTeamId),
       })),
     ];
 
