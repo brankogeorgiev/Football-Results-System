@@ -127,7 +127,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Only admins can DELETE
+    // Only admins can PUT or DELETE
     if (!adminRole) {
       return new Response(JSON.stringify({ error: "Admin access required" }), {
         status: 403,
@@ -135,7 +135,30 @@ Deno.serve(async (req) => {
       });
     }
 
-    // DELETE - Remove role
+    // PUT - Update existing role
+    if (req.method === "PUT") {
+      const body = await req.json();
+      const { id, role } = body;
+
+      if (!id || !role) {
+        return new Response(JSON.stringify({ error: "id and role are required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .update({ role })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+      return new Response(JSON.stringify(data), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     // DELETE - Remove role
     if (req.method === "DELETE") {
