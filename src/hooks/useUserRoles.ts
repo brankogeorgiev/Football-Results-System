@@ -74,7 +74,8 @@ export const useAddAdminRole = () => {
     mutationFn: async (userId: string) => {
       const { error } = await supabase
         .from("user_roles")
-        .insert({ user_id: userId, role: "admin" });
+        .update({ role: "admin" })
+        .eq("user_id", userId);
       
       if (error) throw error;
     },
@@ -96,7 +97,7 @@ export const useRemoveAdminRole = () => {
     mutationFn: async (roleId: string) => {
       const { error } = await supabase
         .from("user_roles")
-        .delete()
+        .update({ role: "user" })
         .eq("id", roleId);
       
       if (error) throw error;
