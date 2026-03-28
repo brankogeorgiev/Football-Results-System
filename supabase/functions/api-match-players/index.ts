@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
         
         const { data, error } = await supabase
           .from("match_players")
-          .insert(matchPlayers)
+          .upsert(matchPlayers, { onConflict: "match_id,player_id" })
           .select(`*, player:players(id, name), team:teams(id, name)`);
         
         if (error) throw error;
